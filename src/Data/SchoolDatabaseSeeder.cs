@@ -1,62 +1,99 @@
-﻿using System;
-using System.Linq;
+﻿using ContosoUniversity.Models;
 using Microsoft.EntityFrameworkCore;
-using Microsoft.Extensions.DependencyInjection;
-using ContosoUniversity.Models;
+using System;
+using System.Linq;
 
 namespace ContosoUniversity.Data
 {
-    public static class DbInitializer
+    internal static class SchoolDatabaseSeeder
     {
-        public static void Initialize(SchoolContext context)
+        public static void Seed(SchoolContext context)
         {
-            //context.Database.EnsureCreated();
+            var students = SeedStudents(context);
+            var instructors = SeedInstructors(context);
+            var departments = SeedDepartments(context, instructors);
+            var courses = SeedCourses(context, departments);
+            var officeAssignments = SeedOfficeAssignments(context, instructors);
+            var courseAssignments = SeedCourseAssignments(context, instructors, courses);
+            var enrollments = SeedEnrollments(context, students, courses);
+        }
 
-            // Look for any students.
+
+        private static Student[] SeedStudents(SchoolContext context)
+        {
+            // Check for existing data.
             if (context.Students.Any())
             {
-                return;   // DB has been seeded
+                return context.Students
+                              .AsNoTracking()
+                              .ToArray();
             }
 
             var students = new Student[]
             {
-                new Student { FirstMidName = "Carson",   LastName = "Alexander",
+                new Student { FirstName = "Carson",   LastName = "Alexander",
                     EnrollmentDate = DateTime.Parse("2010-09-01") },
-                new Student { FirstMidName = "Meredith", LastName = "Alonso",
+                new Student { FirstName = "Meredith", LastName = "Alonso",
                     EnrollmentDate = DateTime.Parse("2012-09-01") },
-                new Student { FirstMidName = "Arturo",   LastName = "Anand",
+                new Student { FirstName = "Arturo",   LastName = "Anand",
                     EnrollmentDate = DateTime.Parse("2013-09-01") },
-                new Student { FirstMidName = "Gytis",    LastName = "Barzdukas",
+                new Student { FirstName = "Gytis",    LastName = "Barzdukas",
                     EnrollmentDate = DateTime.Parse("2012-09-01") },
-                new Student { FirstMidName = "Yan",      LastName = "Li",
+                new Student { FirstName = "Yan",      LastName = "Li",
                     EnrollmentDate = DateTime.Parse("2012-09-01") },
-                new Student { FirstMidName = "Peggy",    LastName = "Justice",
+                new Student { FirstName = "Peggy",    LastName = "Justice",
                     EnrollmentDate = DateTime.Parse("2011-09-01") },
-                new Student { FirstMidName = "Laura",    LastName = "Norman",
+                new Student { FirstName = "Laura",    LastName = "Norman",
                     EnrollmentDate = DateTime.Parse("2013-09-01") },
-                new Student { FirstMidName = "Nino",     LastName = "Olivetto",
+                new Student { FirstName = "Nino",     LastName = "Olivetto",
                     EnrollmentDate = DateTime.Parse("2005-09-01") }
             };
 
             context.Students.AddRange(students);
             context.SaveChanges();
 
+            return students;
+        }
+
+        private static Instructor[] SeedInstructors(SchoolContext context)
+        {
+            // Check for existing data.
+            if (context.Instructors.Any())
+            {
+                return context.Instructors
+                              .AsNoTracking()
+                              .ToArray();
+            }
+
             var instructors = new Instructor[]
             {
-                new Instructor { FirstMidName = "Kim",     LastName = "Abercrombie",
+                new Instructor { FirstName = "Kim",     LastName = "Abercrombie",
                     HireDate = DateTime.Parse("1995-03-11") },
-                new Instructor { FirstMidName = "Fadi",    LastName = "Fakhouri",
+                new Instructor { FirstName = "Fadi",    LastName = "Fakhouri",
                     HireDate = DateTime.Parse("2002-07-06") },
-                new Instructor { FirstMidName = "Roger",   LastName = "Harui",
+                new Instructor { FirstName = "Roger",   LastName = "Harui",
                     HireDate = DateTime.Parse("1998-07-01") },
-                new Instructor { FirstMidName = "Candace", LastName = "Kapoor",
+                new Instructor { FirstName = "Candace", LastName = "Kapoor",
                     HireDate = DateTime.Parse("2001-01-15") },
-                new Instructor { FirstMidName = "Roger",   LastName = "Zheng",
+                new Instructor { FirstName = "Roger",   LastName = "Zheng",
                     HireDate = DateTime.Parse("2004-02-12") }
             };
 
             context.Instructors.AddRange(instructors);
             context.SaveChanges();
+
+            return instructors;
+        }
+
+        private static Department[] SeedDepartments(SchoolContext context, IEnumerable<Instructor> instructors)
+        {
+            // Check for existing data.
+            if (context.Departments.Any())
+            {
+                return context.Departments
+                              .AsNoTracking()
+                              .ToArray();
+            }
 
             var departments = new Department[]
             {
@@ -76,6 +113,19 @@ namespace ContosoUniversity.Data
 
             context.Departments.AddRange(departments);
             context.SaveChanges();
+
+            return departments;
+        }
+
+        private static Course[] SeedCourses(SchoolContext context, IEnumerable<Department> departments)
+        {
+            // Check for existing data.
+            if (context.Courses.Any())
+            {
+                return context.Courses
+                              .AsNoTracking()
+                              .ToArray();
+            }
 
             var courses = new Course[]
             {
@@ -102,11 +152,21 @@ namespace ContosoUniversity.Data
                 },
             };
 
-            foreach (Course c in courses)
-            {
-                context.Courses.Add(c);
-            }
+            context.Courses.AddRange(courses);
             context.SaveChanges();
+
+            return courses;
+        }
+
+        private static OfficeAssignment[] SeedOfficeAssignments(SchoolContext context, IEnumerable<Instructor> instructors)
+        {
+            // Check for existing data.
+            if (context.OfficeAssignments.Any())
+            {
+                return context.OfficeAssignments
+                              .AsNoTracking()
+                              .ToArray();
+            }
 
             var officeAssignments = new OfficeAssignment[]
             {
@@ -124,7 +184,20 @@ namespace ContosoUniversity.Data
             context.OfficeAssignments.AddRange(officeAssignments);
             context.SaveChanges();
 
-            var courseInstructors = new CourseAssignment[]
+            return officeAssignments;
+        }
+
+        private static CourseAssignment[] SeedCourseAssignments(SchoolContext context, IEnumerable<Instructor> instructors, IEnumerable<Course> courses)
+        {
+            // Check for existing data.
+            if (context.CourseAssignments.Any())
+            {
+                return context.CourseAssignments
+                              .AsNoTracking()
+                              .ToArray();
+            }
+
+            var courseAssignments = new CourseAssignment[]
             {
                 new CourseAssignment {
                     CourseID = courses.Single(c => c.Title == "Chemistry" ).CourseID,
@@ -160,8 +233,21 @@ namespace ContosoUniversity.Data
                     },
             };
 
-            context.CourseAssignments.AddRange(courseInstructors);
+            context.CourseAssignments.AddRange(courseAssignments);
             context.SaveChanges();
+
+            return courseAssignments;
+        }
+
+        private static Enrollment[] SeedEnrollments(SchoolContext context, IEnumerable<Student> students, IEnumerable<Course> courses)
+        {
+            // Check for existing data.
+            if (context.Enrollments.Any())
+            {
+                return context.Enrollments
+                              .AsNoTracking()
+                              .ToArray();
+            }
 
             var enrollments = new Enrollment[]
             {
@@ -169,7 +255,7 @@ namespace ContosoUniversity.Data
                     StudentID = students.Single(s => s.LastName == "Alexander").ID,
                     CourseID = courses.Single(c => c.Title == "Chemistry" ).CourseID,
                     Grade = Grade.A
-                },
+                    },
                     new Enrollment {
                     StudentID = students.Single(s => s.LastName == "Alexander").ID,
                     CourseID = courses.Single(c => c.Title == "Microeconomics" ).CourseID,
@@ -204,7 +290,7 @@ namespace ContosoUniversity.Data
                     CourseID = courses.Single(c => c.Title == "Microeconomics").CourseID,
                     Grade = Grade.B
                     },
-                new Enrollment {
+                    new Enrollment {
                     StudentID = students.Single(s => s.LastName == "Barzdukas").ID,
                     CourseID = courses.Single(c => c.Title == "Chemistry").CourseID,
                     Grade = Grade.B
@@ -221,18 +307,10 @@ namespace ContosoUniversity.Data
                     }
             };
 
-            foreach (Enrollment e in enrollments)
-            {
-                var enrollmentInDataBase = context.Enrollments.Where(
-                    s =>
-                            s.Student.ID == e.StudentID &&
-                            s.Course.CourseID == e.CourseID).SingleOrDefault();
-                if (enrollmentInDataBase == null)
-                {
-                    context.Enrollments.Add(e);
-                }
-            }
+            context.Enrollments.AddRange(enrollments);
             context.SaveChanges();
+
+            return enrollments;
         }
     }
 }

@@ -1,7 +1,7 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.ComponentModel.DataAnnotations;
-using System.ComponentModel.DataAnnotations.Schema;
+
 
 namespace ContosoUniversity.Models
 {
@@ -13,6 +13,6 @@ namespace ContosoUniversity.Models
         public DateTime HireDate { get; set; }
 
         public ICollection<CourseAssignment> CourseAssignments { get; set; }
-        public OfficeAssignment OfficeAssignment { get; set; }
+        public OfficeAssignment? OfficeAssignment { get; set; }
     }
 }
