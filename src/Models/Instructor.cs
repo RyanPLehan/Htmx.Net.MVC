@@ -1,6 +1,8 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.ComponentModel.DataAnnotations;
+using Microsoft.AspNetCore.Mvc.ModelBinding;
+using Microsoft.AspNetCore.Mvc.ModelBinding.Validation;
 
 
 namespace ContosoUniversity.Models
@@ -12,7 +14,12 @@ namespace ContosoUniversity.Models
         [Display(Name = "Hire Date")]
         public DateTime HireDate { get; set; }
 
+        [BindNever]
+        [ValidateNever]
         public ICollection<CourseAssignment> CourseAssignments { get; set; }
+
+        [BindNever]
+        [ValidateNever]
         public OfficeAssignment? OfficeAssignment { get; set; }
     }
 }

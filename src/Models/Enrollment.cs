@@ -1,5 +1,7 @@
 ﻿using System.ComponentModel.DataAnnotations;
 using System.ComponentModel.DataAnnotations.Schema;
+using Microsoft.AspNetCore.Mvc.ModelBinding;
+using Microsoft.AspNetCore.Mvc.ModelBinding.Validation;
 
 namespace ContosoUniversity.Models
 {
@@ -16,7 +18,12 @@ namespace ContosoUniversity.Models
         [DisplayFormat(NullDisplayText = "No grade")]
         public Grade? Grade { get; set; }
 
+        [BindNever]
+        [ValidateNever]
         public Course Course { get; set; }
+
+        [BindNever]
+        [ValidateNever]
         public Student Student { get; set; }
     }
 }

@@ -1,6 +1,8 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.ComponentModel.DataAnnotations;
+using Microsoft.AspNetCore.Mvc.ModelBinding;
+using Microsoft.AspNetCore.Mvc.ModelBinding.Validation;
 
 
 namespace ContosoUniversity.Models
@@ -23,9 +25,16 @@ namespace ContosoUniversity.Models
         public int? InstructorID { get; set; }
 
         [Timestamp]
+        [BindNever]
+        [ValidateNever]
         public byte[] RowVersion { get; set; }
 
+        [BindNever]
+        [ValidateNever]
         public Instructor Administrator { get; set; }
+
+        [BindNever]
+        [ValidateNever]
         public ICollection<Course> Courses { get; set; }
     }
 }

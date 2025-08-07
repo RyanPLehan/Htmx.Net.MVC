@@ -94,6 +94,9 @@ namespace ContosoUniversity.Controllers
         // POST: Courses/Edit/5
         // To protect from overposting attacks, please enable the specific properties you want to bind to, for 
         // more details see http://go.microsoft.com/fwlink/?LinkId=317598.
+        // For Validation and Binding issues see the following
+        // https://github.com/dotnet/aspnetcore/issues/29877
+        // https://andrewlock.net/preventing-mass-assignment-or-over-posting-in-asp-net-core/
         [HttpPost, ActionName("Edit")]
         [ValidateAntiForgeryToken]
         public async Task<IActionResult> EditPost(int? id)
