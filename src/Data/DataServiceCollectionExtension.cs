@@ -20,6 +20,16 @@ public static class DataServiceCollectionExtension
         var connectionBuilder = CreateConnectionBuilder(databaseName, SqliteOpenMode.Memory);
 
         CreateDatabase(connectionBuilder, services);
+
+        // Choose 1 of 3 methods for creating the schema
+        CreateSchemaFromDbContext(connectionBuilder);
+        //CreateSchemaFromGeneratedSql(connectionBuilder);
+        //CreateSchemaFromSqlScript(connectionBuilder);
+
+        // Create other database objects
+        CreateTriggers(connectionBuilder);
+
+        // Seed database with data
         SeedSchoolDatabase(connectionBuilder);
 
         // Database Context(s)
@@ -40,7 +50,6 @@ public static class DataServiceCollectionExtension
         SqliteConnection connection = new SqliteConnection(connectionBuilder.ToString());
 
         connection.Open();
-        CreateSchema(connection);
 
         if (connectionBuilder.Mode == SqliteOpenMode.Memory)
         {
@@ -89,25 +98,66 @@ public static class DataServiceCollectionExtension
 
 
     /// <summary>
-    /// Create Schema
+    /// Create Schema from Db Context
     /// </summary>
-    /// <param name="conn"></param>
-    /// <remarks>
-    /// There are 3 ways to create the db schema
-    /// The first two use EF code first approach.  However, it does not always produces the desired SQL Scripts
-    /// 1. Use the EnsureCreated.  Optionally preface with EnsureDeleted to delete existing database.
-    ///    context.Database.EnsureDeleted();
-    ///    context.Database.EnsureCreated();
-    /// 2. Generate the Sql script and execute it directly
-    ///    var sql = context.Database.GenerateCreateScript();
-    ///    var location = context.Database.GetConnectionString();
-    ///    context.Database.ExecuteSqlRaw(sql);
-    /// 3. Read in manually generated Sql script and execute it directly as is below
-    /// </remarks>
-    private static void CreateSchema(SqliteConnection conn)
+    /// <param name="connectionBuilder"></param>
+    private static void CreateSchemaFromDbContext(SqliteConnectionStringBuilder connectionBuilder)
     {
-        const string RESOURCE_NAME = "ContosoUniversity.sql";
+        var optionsBuilder = new DbContextOptionsBuilder<SchoolContext>()
+            .UseSqlite(connectionBuilder.ToString(), AddDatabaseOptions);
+
+        var context = new SchoolContext(optionsBuilder.Options);
+        context.Database.EnsureDeleted();
+        context.Database.EnsureCreated();
+    }
+
+
+    /// <summary>
+    /// Create Schema from Db Context Generated Sql
+    /// </summary>
+    /// <param name="connectionBuilder"></param>
+    private static void CreateSchemaFromGeneratedSql(SqliteConnectionStringBuilder connectionBuilder)
+    {
+        var optionsBuilder = new DbContextOptionsBuilder<SchoolContext>()
+            .UseSqlite(connectionBuilder.ToString(), AddDatabaseOptions);
+
+        var context = new SchoolContext(optionsBuilder.Options);
+        var sql = context.Database.GenerateCreateScript();
+        var location = context.Database.GetConnectionString();
+        context.Database.ExecuteSqlRaw(sql);
+    }
+
+
+    /// <summary>
+    /// Create Schema from Sql Script
+    /// </summary>
+    /// <param name="connectionBuilder"></param>
+    private static void CreateSchemaFromSqlScript(SqliteConnectionStringBuilder connectionBuilder)
+    {
+        const string RESOURCE_NAME = "ContosoUniversitySchema.sql";
         string resourceFQN = GetResourceFQN(RESOURCE_NAME);
+        SqliteConnection conn = new SqliteConnection(connectionBuilder.ToString());
+        SqliteCommand command = new SqliteCommand();
+
+        if (conn.State != System.Data.ConnectionState.Open)
+            conn.Open();
+
+        command.CommandType = System.Data.CommandType.Text;
+        command.CommandText = LoadFromResource(resourceFQN);
+        command.Connection = conn;
+        command.ExecuteNonQuery();
+    }
+
+
+    /// <summary>
+    /// Create Triggers
+    /// </summary>
+    /// <param name="connectionBuilder"></param>
+    private static void CreateTriggers(SqliteConnectionStringBuilder connectionBuilder)
+    {
+        const string RESOURCE_NAME = "ContosoUniversityTriggers.sql";
+        string resourceFQN = GetResourceFQN(RESOURCE_NAME);
+        SqliteConnection conn = new SqliteConnection(connectionBuilder.ToString());
         SqliteCommand command = new SqliteCommand();
 
         if (conn.State != System.Data.ConnectionState.Open)
@@ -144,6 +194,7 @@ public static class DataServiceCollectionExtension
 
         return resourceData;
     }
+
 
     private static void SeedSchoolDatabase(SqliteConnectionStringBuilder connectionBuilder)
     {

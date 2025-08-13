@@ -7,10 +7,6 @@
   </PropertyGroup>
 
   <ItemGroup>
-    <None Remove="Data\Resources\ContosoUniversity.sql" />
-  </ItemGroup>
-
-  <ItemGroup>
     <PackageReference Include="Microsoft.AspNetCore.Diagnostics.EntityFrameworkCore" Version="8.0.18" />
     <PackageReference Include="Microsoft.EntityFrameworkCore" Version="9.0.7" />
     <PackageReference Include="Microsoft.EntityFrameworkCore.Relational" Version="9.0.7" />
@@ -19,7 +15,8 @@
   </ItemGroup>
 
   <ItemGroup>
-    <EmbeddedResource Include="Data\Resources\ContosoUniversity.sql" />
+    <EmbeddedResource Include="Data\Resources\ContosoUniversityTriggers.sql" />
+    <EmbeddedResource Include="Data\Resources\ContosoUniversitySchema.sql" />
   </ItemGroup>
 
 </Project>
