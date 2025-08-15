@@ -12,4 +12,5 @@ The following are derivations that I applied to the original MS sample applicati
 ## Branch: 01-Baseline
 This is the original MS Contoso University sample .Net MVC application with the forementioned derivations applied.
 
-
+## Branch: 02-HTMX
+Here we have removed the jQuery libraries and have added the HTMX library.  The HTMX library will allow our HTML application to make HTTP Requests using any of the following HTTP verbs: GET, POST, PUT, PATCH, DELETE.
