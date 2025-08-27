@@ -14,3 +14,7 @@ This is the original MS Contoso University sample .Net MVC application with the 
 
 ## Branch: 02-HTMX
 Here we have removed the jQuery libraries and have added the HTMX library.  The HTMX library will allow our HTML application to make HTTP Requests using any of the following HTTP verbs: GET, POST, PUT, PATCH, DELETE.  Even though we have added the HTMX library, we are not using any of the HTMS tags/functionality.
+
+## Branch: 03-NavBar
+This branch will implement the first HTMX functionality, starting with the navigation bar.
+With each click of a navigation item, the content will change in-place without refreshing the entire page.  At this point, we can use either Partial Views or View Components.  For this demonstration, [View Components](https://learn.microsoft.com/en-us/aspnet/core/mvc/views/view-components?view=aspnetcore-8.0) will be used.

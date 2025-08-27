@@ -8,7 +8,7 @@ using ContosoUniversity.Models;
 using Microsoft.EntityFrameworkCore;
 using ContosoUniversity.Data;
 using ContosoUniversity.Models.SchoolViewModels;
-using System.Data.Common;
+using ContosoUniversity.ViewComponents;
 
 namespace ContosoUniversity.Controllers
 {
@@ -76,7 +76,7 @@ namespace ContosoUniversity.Controllers
 
         public IActionResult Privacy()
         {
-            return View();
+            return ViewComponent(typeof(PrivacyViewComponent));
         }
 
         [ResponseCache(Duration = 0, Location = ResponseCacheLocation.None, NoStore = true)]

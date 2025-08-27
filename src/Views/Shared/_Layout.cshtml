@@ -53,14 +53,18 @@
     </header>
     <div class="container">
         <partial name="_CookieConsentPartial" />
-        <main role="main" class="pb-3">
+        <main role="main" id="root" class="pb-3">
             @RenderBody()
         </main>
     </div>
 
     <footer class="border-top footer text-muted">
         <div class="container">
-            &copy; 2019 - Contoso University - <a asp-area="" asp-controller="Home" asp-action="Privacy">Privacy</a>
+            &copy; 2019 - Contoso University - <a href=""
+                                                  hx-trigger="click"
+                                                  hx-get="/home/privacy"
+                                                  hx-target="#root"
+                                                  hx-swap="innerHTML">Privacy</a>
         </div>
     </footer>
 
