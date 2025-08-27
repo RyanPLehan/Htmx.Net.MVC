@@ -3,7 +3,7 @@ using ContosoUniversity.Models.SchoolViewModels;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
 
-namespace ContosoUniversity.ViewComponents
+namespace ContosoUniversity.ViewComponents.Home
 {
     /// <summary>
     /// Display Privacy statement

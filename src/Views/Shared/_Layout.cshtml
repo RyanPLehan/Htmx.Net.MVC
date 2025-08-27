@@ -41,7 +41,13 @@
                                hx-push-url="/home/about">About</a>
                         </li>
                         <li class="nav-item">
-                            <a class="nav-link text-dark" asp-area="" asp-controller="Students" asp-action="Index">Students</a>
+                            <a class="nav-link text-dark" 
+                               href="/students/index"
+                               hx-trigger="click"
+                               hx-get="/students/index"
+                               hx-target="#root"
+                               hx-swap="innerHTML"
+                               hx-push-url="/students/index">Students</a>
                         </li>
                         <li class="nav-item">
                             <a class="nav-link text-dark" asp-area="" asp-controller="Courses" asp-action="Index">Courses</a>

@@ -1,6 +1,6 @@
 ﻿using Microsoft.AspNetCore.Mvc;
 
-namespace ContosoUniversity.ViewComponents
+namespace ContosoUniversity.ViewComponents.Home
 {
     /// <summary>
     /// Display Privacy statement

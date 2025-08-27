@@ -3,7 +3,7 @@ using System.Diagnostics;
 using System.Threading.Tasks;
 using Microsoft.AspNetCore.Mvc;
 using ContosoUniversity.Models;
-using ContosoUniversity.ViewComponents;
+using ContosoUniversity.ViewComponents.Home;
 
 namespace ContosoUniversity.Controllers
 {
