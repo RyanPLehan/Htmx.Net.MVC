@@ -1,12 +1,13 @@
 ﻿using System.Collections.Generic;
 using System.ComponentModel.DataAnnotations;
-using System.ComponentModel.DataAnnotations.Schema;
+using Microsoft.AspNetCore.Mvc.ModelBinding;
+using Microsoft.AspNetCore.Mvc.ModelBinding.Validation;
+
 
 namespace ContosoUniversity.Models
 {
     public class Course
     {
-        [DatabaseGenerated(DatabaseGeneratedOption.None)]
         [Display(Name = "Number")]
         public int CourseID { get; set; }
 
@@ -18,8 +19,16 @@ namespace ContosoUniversity.Models
 
         public int DepartmentID { get; set; }
 
+        [BindNever]
+        [ValidateNever]
         public Department Department { get; set; }
+
+        [BindNever]
+        [ValidateNever]
         public ICollection<Enrollment> Enrollments { get; set; }
+
+        [BindNever]
+        [ValidateNever]
         public ICollection<CourseAssignment> CourseAssignments { get; set; }
     }
 }

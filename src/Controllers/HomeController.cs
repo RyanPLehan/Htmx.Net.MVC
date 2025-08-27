@@ -29,6 +29,18 @@ namespace ContosoUniversity.Controllers
         public async Task<ActionResult> About()
         {
             List<EnrollmentDateGroup> groups = new List<EnrollmentDateGroup>();
+
+            groups = await _context.Students
+                                   .GroupBy(x => x.EnrollmentDate)
+                                   .Select(grp => new EnrollmentDateGroup()
+                                   {
+                                       EnrollmentDate = grp.Key,
+                                       StudentCount = grp.Count()
+                                   })
+                                   .ToListAsync();
+
+            
+            /*
             var conn = _context.Database.GetDbConnection();
             try
             {
@@ -57,6 +69,8 @@ namespace ContosoUniversity.Controllers
             {
                 conn.Close();
             }
+            */
+
             return View(groups);
         }
 

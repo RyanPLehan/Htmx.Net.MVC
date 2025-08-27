@@ -34,11 +34,11 @@ namespace ContosoUniversity.Controllers
                 return NotFound();
             }
 
-            string query = "SELECT * FROM Department WHERE DepartmentID = {0}";
+            //string query = "SELECT * FROM Department WHERE DepartmentID = {0}";
             var department = await _context.Departments
-                .FromSqlRaw(query, id)
-                .Include(d => d.Administrator)
                 .AsNoTracking()
+                .Where(x => x.DepartmentID == id)
+                .Include(d => d.Administrator)
                 .FirstOrDefaultAsync();
 
             if (department == null)
@@ -61,7 +61,7 @@ namespace ContosoUniversity.Controllers
         // more details see http://go.microsoft.com/fwlink/?LinkId=317598.
         [HttpPost]
         [ValidateAntiForgeryToken]
-        public async Task<IActionResult> Create([Bind("DepartmentID,Name,Budget,StartDate,InstructorID,RowVersion")] Department department)
+        public async Task<IActionResult> Create([Bind("DepartmentID,Name,Budget,StartDate,InstructorID")] Department department)
         {
             if (ModelState.IsValid)
             {
@@ -218,7 +218,10 @@ namespace ContosoUniversity.Controllers
             {
                 if (await _context.Departments.AnyAsync(m => m.DepartmentID == department.DepartmentID))
                 {
-                    _context.Departments.Remove(department);
+                    var departmentToDelete = await _context.Departments
+                                                           .Where(x => x.DepartmentID == department.DepartmentID)
+                                                           .FirstOrDefaultAsync();
+                    _context.Departments.Remove(departmentToDelete);
                     await _context.SaveChangesAsync();
                 }
                 return RedirectToAction(nameof(Index));
