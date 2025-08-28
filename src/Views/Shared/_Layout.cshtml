@@ -38,7 +38,8 @@
                                hx-get="/home/about"
                                hx-target="#root"
                                hx-swap="innerHTML"
-                               hx-push-url="/home/about">About
+                               hx-push-url="/home/about">
+                                About
                            </a>
                         </li>
                         <li class="nav-item">
@@ -48,7 +49,8 @@
                                hx-get="/students/index"
                                hx-target="#root"
                                hx-swap="innerHTML"
-                               hx-push-url="/students/index">Students
+                               hx-push-url="/students/index">
+                                Students
                            </a>
                         </li>
                         <li class="nav-item">
@@ -58,11 +60,20 @@
                                hx-get="/courses/index"
                                hx-target="#root"
                                hx-swap="innerHTML"
-                               hx-push-url="/courses/index">Courses
+                               hx-push-url="/courses/index">
+                                Courses
                            </a>
                         </li>
                         <li class="nav-item">
-                            <a class="nav-link text-dark" asp-area="" asp-controller="Instructors" asp-action="Index">Instructors</a>
+                            <a class="nav-link text-dark" 
+                               href="/instructors/index"
+                               hx-trigger="click"
+                               hx-get="/instructors/index"
+                               hx-target="#root"
+                               hx-swap="innerHTML"
+                               hx-push-url="/instructors/index">
+                                Instructors
+                           </a>
                         </li>
                         <li class="nav-item">
                             <a class="nav-link text-dark" asp-area="" asp-controller="Departments" asp-action="Index">Departments</a>
