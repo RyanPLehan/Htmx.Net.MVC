@@ -17,4 +17,22 @@ Here we have removed the jQuery libraries and have added the HTMX library.  The 
 
 ## Branch: 03-NavBar
 This branch will implement the first HTMX functionality, starting with the navigation bar.
-With each click of a navigation item, the content will change in-place without refreshing the entire page.  Some pages have deeper CRUD functionality which displays other pages.  This deeper functionality will be addressed later.  At this point, we can use either Partial Views or View Components.  For this demonstration, [View Components](https://learn.microsoft.com/en-us/aspnet/core/mvc/views/view-components?view=aspnetcore-8.0) will be used to demonstrate maximum control by the developer.
+With each click of a navigation item, the content will change in-place without refreshing the entire page.  Some pages have deeper CRUD functionality which displays other pages.  This deeper functionality will be addressed later.  At this point, we can use either Partial Views or View Components.  For this demonstration, [View Components](https://learn.microsoft.com/en-us/aspnet/core/mvc/views/view-components?view=aspnetcore-8.0) will be used to demonstrate maximum control by the developer.  Dependency Injection is automatically handled by Asp.Net for the View Component classes.
+
+The only navigation items that were not changed: Home and the Contoso University Logo.
+These items will still cause a complete page refresh.  This was intentional so that one can see the difference between a complete page refresh and a DOM manipulation done by HTMX.
+
+The following controllers and their respective methods were changed.  This, in-turn, required a corresponding creation of a View Component class, with the respective method name and one or more Views that will render a HTML fragment.  For directory structure, please see [View Components](https://learn.microsoft.com/en-us/aspnet/core/mvc/views/view-components?view=aspnetcore-8.0)
+
+| Controller | Method | View Component | Original View | New View |
+| :--------------- | :---------- | :-------------------- | :----------------- | :-----------------
+| HomeController | About | AboutViewComponent | About.cshtml | Default.cshtml |
+| HomeController | Privacy | PrivacyViewComponent | Privacy.cshtml | Default.cshtml |
+| CoursesController | Index | IndexViewComponent | Index.cshtml | Default.cshtml |
+| StudentsController | Index | IndexViewComponent | Index.cshtml | Default.cshtml |
+| InstructorsController | Index | IndexViewComponent | Index.cshtml | Default.cshtml |
+|  |  |  | Index.cshtml | Default.cshtml |
+|  |  |  | Index.cshtml | Courses.cshtml |
+|  |  |  | Index.cshtml | Enrollments.cshtml |
+
+
