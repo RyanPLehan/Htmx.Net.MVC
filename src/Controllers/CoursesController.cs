@@ -7,6 +7,7 @@ using Microsoft.AspNetCore.Mvc.Rendering;
 using Microsoft.EntityFrameworkCore;
 using ContosoUniversity.Data;
 using ContosoUniversity.Models;
+using ContosoUniversity.ViewComponents.Courses;
 
 namespace ContosoUniversity.Controllers
 {
@@ -22,10 +23,7 @@ namespace ContosoUniversity.Controllers
         // GET: Courses
         public async Task<IActionResult> Index()
         {
-            var courses = _context.Courses
-                .Include(c => c.Department)
-                .AsNoTracking();
-            return View(await courses.ToListAsync());
+            return ViewComponent(typeof(IndexViewComponent));
         }
 
         // GET: Courses/Details/5

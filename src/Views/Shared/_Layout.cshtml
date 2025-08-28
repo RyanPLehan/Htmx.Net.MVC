@@ -21,7 +21,7 @@
     <header>
         <nav class="navbar navbar-expand-sm navbar-toggleable-sm navbar-light bg-white border-bottom box-shadow mb-3">
             <div class="container">
-                <a class="navbar-brand" asp-area="" asp-controller="Home" asp-action="Index">Contoso University</a>
+                <a class="navbar-brand" href="/home/index">Contoso University</a>
                 <button class="navbar-toggler" type="button" data-toggle="collapse" data-target=".navbar-collapse" aria-controls="navbarSupportedContent"
                         aria-expanded="false" aria-label="Toggle navigation">
                     <span class="navbar-toggler-icon"></span>
@@ -38,7 +38,8 @@
                                hx-get="/home/about"
                                hx-target="#root"
                                hx-swap="innerHTML"
-                               hx-push-url="/home/about">About</a>
+                               hx-push-url="/home/about">About
+                           </a>
                         </li>
                         <li class="nav-item">
                             <a class="nav-link text-dark" 
@@ -47,10 +48,18 @@
                                hx-get="/students/index"
                                hx-target="#root"
                                hx-swap="innerHTML"
-                               hx-push-url="/students/index">Students</a>
+                               hx-push-url="/students/index">Students
+                           </a>
                         </li>
                         <li class="nav-item">
-                            <a class="nav-link text-dark" asp-area="" asp-controller="Courses" asp-action="Index">Courses</a>
+                            <a class="nav-link text-dark"
+                               href="/courses/index"
+                               hx-trigger="click"
+                               hx-get="/courses/index"
+                               hx-target="#root"
+                               hx-swap="innerHTML"
+                               hx-push-url="/courses/index">Courses
+                           </a>
                         </li>
                         <li class="nav-item">
                             <a class="nav-link text-dark" asp-area="" asp-controller="Instructors" asp-action="Index">Instructors</a>

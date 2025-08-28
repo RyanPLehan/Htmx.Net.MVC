@@ -13,13 +13,6 @@ namespace ContosoUniversity.ViewComponents.Students
     {
         private readonly SchoolContext _context;
 
-        public class ViewModel
-        {
-            public string CurrentSortOrder { get; set; }
-            public string CurrentFilter { get; set; }
-            public PaginatedList<Student> Students { get; set; }
-        }
-
         public IndexViewComponent(SchoolContext context)
         {
             _context = context;
@@ -51,13 +44,6 @@ namespace ContosoUniversity.ViewComponents.Students
 
             int pageSize = 3;
             PaginatedList<Student> students = await PaginatedList<Student>.CreateAsync(query.AsNoTracking(), pageNumber ?? 1, pageSize);
-
-            ViewModel model = new ViewModel()
-            {
-                CurrentSortOrder = sortOrder,
-                CurrentFilter = searchString,
-                Students = students
-            };
 
             return View(students);
         }
