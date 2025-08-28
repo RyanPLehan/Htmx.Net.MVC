@@ -17,4 +17,4 @@ Here we have removed the jQuery libraries and have added the HTMX library.  The 
 
 ## Branch: 03-NavBar
 This branch will implement the first HTMX functionality, starting with the navigation bar.
-With each click of a navigation item, the content will change in-place without refreshing the entire page.  At this point, we can use either Partial Views or View Components.  For this demonstration, [View Components](https://learn.microsoft.com/en-us/aspnet/core/mvc/views/view-components?view=aspnetcore-8.0) will be used.
+With each click of a navigation item, the content will change in-place without refreshing the entire page.  Some pages have deeper CRUD functionality which displays other pages.  This deeper functionality will be addressed later.  At this point, we can use either Partial Views or View Components.  For this demonstration, [View Components](https://learn.microsoft.com/en-us/aspnet/core/mvc/views/view-components?view=aspnetcore-8.0) will be used to demonstrate maximum control by the developer.
