@@ -76,7 +76,15 @@
                            </a>
                         </li>
                         <li class="nav-item">
-                            <a class="nav-link text-dark" asp-area="" asp-controller="Departments" asp-action="Index">Departments</a>
+                            <a class="nav-link text-dark"
+                               href="/departments/index"
+                               hx-trigger="click"
+                               hx-get="/departments/index"
+                               hx-target="#root"
+                               hx-swap="innerHTML"
+                               hx-push-url="/departments/index">
+                                Departments
+                            </a>
                         </li>
                     </ul>
                 </div>

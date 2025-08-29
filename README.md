@@ -22,9 +22,9 @@ With each click of a navigation item, the content will change in-place without r
 The only navigation items that were not changed: Home and the Contoso University Logo.
 These items will still cause a complete page refresh.  This was intentional so that one can see the difference between a complete page refresh and a DOM manipulation done by HTMX.
 
-The following controllers and their respective methods were changed.  This, in-turn, required a corresponding creation of a View Component class, with the respective method name and one or more Views that will render a HTML fragment.  For directory structure, please see [View Components](https://learn.microsoft.com/en-us/aspnet/core/mvc/views/view-components?view=aspnetcore-8.0)
+The following controllers and their respective methods were changed.  This, in-turn, required a corresponding creation of a View Component class, with the respective Route name and one or more Views that will render a HTML fragment.  For directory structure, please see [View Components](https://learn.microsoft.com/en-us/aspnet/core/mvc/views/view-components?view=aspnetcore-8.0)
 
-| Controller | Method | View Component | Original View | New View |
+| Controller | Route | View Component | Original View | New View |
 | :--------------- | :---------- | :-------------------- | :----------------- | :-----------------
 | HomeController | About | AboutViewComponent | About.cshtml | Default.cshtml |
 | HomeController | Privacy | PrivacyViewComponent | Privacy.cshtml | Default.cshtml |
@@ -34,5 +34,5 @@ The following controllers and their respective methods were changed.  This, in-t
 |  |  |  | Index.cshtml | Default.cshtml |
 |  |  |  | Index.cshtml | Courses.cshtml |
 |  |  |  | Index.cshtml | Enrollments.cshtml |
-
+| DepartmentsController | Index | IndexViewComponent | Index.cshtml | Default.cshtml |
 

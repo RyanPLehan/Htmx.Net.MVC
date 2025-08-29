@@ -1,9 +1,8 @@
 ﻿using ContosoUniversity.Data;
 using ContosoUniversity.Models;
-using ContosoUniversity.Models.SchoolViewModels;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
-using System.Collections.Generic;
+
 
 namespace ContosoUniversity.ViewComponents.Instructors
 {
