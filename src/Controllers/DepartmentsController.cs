@@ -7,6 +7,7 @@ using Microsoft.AspNetCore.Mvc.Rendering;
 using Microsoft.EntityFrameworkCore;
 using ContosoUniversity.Data;
 using ContosoUniversity.Models;
+using ContosoUniversity.ViewComponents.Departments;
 
 namespace ContosoUniversity.Controllers
 {
@@ -22,8 +23,7 @@ namespace ContosoUniversity.Controllers
         // GET: Departments
         public async Task<IActionResult> Index()
         {
-            var schoolContext = _context.Departments.Include(d => d.Administrator);
-            return View(await schoolContext.ToListAsync());
+            return ViewComponent(typeof(IndexViewComponent));
         }
 
         // GET: Departments/Details/5

@@ -8,6 +8,7 @@ using Microsoft.EntityFrameworkCore;
 using ContosoUniversity.Data;
 using ContosoUniversity.Models;
 using ContosoUniversity.Models.SchoolViewModels;
+using ContosoUniversity.ViewComponents.Instructors;
 
 namespace ContosoUniversity.Controllers
 {
@@ -23,36 +24,13 @@ namespace ContosoUniversity.Controllers
         // GET: Instructors
         public async Task<IActionResult> Index(int? id, int? courseID)
         {
-            var viewModel = new InstructorIndexData();
-            viewModel.Instructors = await _context.Instructors
-                  .Include(i => i.OfficeAssignment)
-                  .Include(i => i.CourseAssignments)
-                    .ThenInclude(i => i.Course)
-                        .ThenInclude(i => i.Department)
-                  .OrderBy(i => i.LastName)
-                  .ToListAsync();
-
-            if (id != null)
+            var parameters = new
             {
-                ViewData["InstructorID"] = id.Value;
-                Instructor instructor = viewModel.Instructors.Where(
-                    i => i.ID == id.Value).Single();
-                viewModel.Courses = instructor.CourseAssignments.Select(s => s.Course);
-            }
+                id = id,
+                courseID = courseID,
+            };
 
-            if (courseID != null)
-            {
-                ViewData["CourseID"] = courseID.Value;
-                var selectedCourse = viewModel.Courses.Where(x => x.CourseID == courseID).Single();
-                await _context.Entry(selectedCourse).Collection(x => x.Enrollments).LoadAsync();
-                foreach (Enrollment enrollment in selectedCourse.Enrollments)
-                {
-                    await _context.Entry(enrollment).Reference(x => x.Student).LoadAsync();
-                }
-                viewModel.Enrollments = selectedCourse.Enrollments;
-            }
-
-            return View(viewModel);
+            return ViewComponent(typeof(IndexViewComponent), parameters);
         }
 
         // GET: Instructors/Details/5

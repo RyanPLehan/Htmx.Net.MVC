@@ -20,6 +20,7 @@
   </ItemGroup>
 
   <ItemGroup>
+    <Folder Include="Views\Home\Components\Privacy\" />
     <Folder Include="wwwroot\lib\htmx\" />
   </ItemGroup>
 
