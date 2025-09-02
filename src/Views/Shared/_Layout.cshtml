@@ -21,7 +21,15 @@
     <header>
         <nav class="navbar navbar-expand-sm navbar-toggleable-sm navbar-light bg-white border-bottom box-shadow mb-3">
             <div class="container">
-                <a class="navbar-brand" href="/home/index">Contoso University</a>
+                <a class="navbar-brand"
+                   href="/home/index"
+                   hx-trigger="click"
+                   hx-get="/home/index"
+                   hx-target="#root"
+                   hx-swap="innerHTML"
+                   hx-push-url="/home/index">
+                    Contoso University
+                </a>
                 <button class="navbar-toggler" type="button" data-toggle="collapse" data-target=".navbar-collapse" aria-controls="navbarSupportedContent"
                         aria-expanded="false" aria-label="Toggle navigation">
                     <span class="navbar-toggler-icon"></span>
@@ -29,7 +37,15 @@
                 <div class="navbar-collapse collapse d-sm-inline-flex flex-sm-row-reverse">
                     <ul class="navbar-nav flex-grow-1">
                         <li class="nav-item">
-                            <a class="nav-link text-dark" href="/home/index">Home</a>
+                            <a class="nav-link text-dark" 
+                               href="/home/index"
+                               hx-trigger="click"
+                               hx-get="/home/index"
+                               hx-target="#root"
+                               hx-swap="innerHTML"
+                               hx-push-url="/home/index">
+                                Home
+                            </a>
                         </li>
                         <li class="nav-item">
                             <a class="nav-link text-dark"

@@ -12,7 +12,12 @@ namespace ContosoUniversity.Controllers
 
         public IActionResult Index()
         {
-            return View();
+            bool isHtmxRequest = !String.IsNullOrWhiteSpace(this.HttpContext.Request.Headers["HX-Request"]);
+
+            if (isHtmxRequest)
+                return ViewComponent(typeof(IndexViewComponent));
+            else
+                return View();
         }
 
         public async Task<ActionResult> About()
