@@ -42,16 +42,16 @@ Up to this point, all the Navigation Bar links, with the exception of the Contos
 Howerver, many times users will have saved a link to a specific route, such that, the browser will by pass the website's default landing page.  For example, while the application is running and you open a new tab in your browser and paste: https://localhost:5001/departments  (localhost:5001 is my server), you will get an HTML fragment of the Departments.
 
 This is a problem with using HTMX for the following reasons:
-1. Going to a direct route will execute a component may have the following results:
-    - Return a fragmented HTML page.
-    - May experience a runtime error due to dependencies of HTMX related properties (ie. checking for hx-* keys in the request header)
-2. Bypassing the landing page may not load the following:
+1. Bypassing the landing page may not load the following:
     - Logo(s)
     - Headers
     - Navigation Bar
     - Footer
     - CSS
     - Javascript libraries, such as HTMX
+2. Going to a direct route will execute a component that may have the following results:
+    - Return a fragmented HTML page without HTMX to place it into the proper DOM element.
+    - May experience a runtime error due to dependencies of HTMX related properties (ie. checking for hx-* keys in the request header)
 
 The following are solutions to address this issue:
 1. Redirect to default Landing Page
@@ -66,6 +66,6 @@ The following are solutions to address this issue:
         - Construct a modified Landing Page, but pass just the route portion of the url into landing page, such that, when the page is loaded, HTMX will issue a HTTP-GET to the route.
 
 For this demonstration, this applicaiton will choose solution #3, with the following modifications:
-    - Modify Contoso University Logo and Home navigation bar links to return HTML fragments.
-    - Create a generic landing page such that when the page loads, HTMX will automatically invoke a given route
-        - The given route will, by default, be the home page or the route passed in by the middelware component.
+1. Modify Contoso University Logo and Home navigation bar links to return HTML fragments.
+2. Create a generic landing page such that when the page loads, HTMX will automatically invoke a given route
+3. The given route will, by default, be the home page or the route passed in by the middelware component.
