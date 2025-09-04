@@ -1,4 +1,5 @@
 using ContosoUniversity.Data;
+using ContosoUniversity.Middleware;
 using Microsoft.AspNetCore.Hosting;
 using Microsoft.Data.Sqlite;
 using Microsoft.EntityFrameworkCore;
@@ -64,6 +65,10 @@ namespace ContosoUniversity
             app.UseStaticFiles();
             app.UseRouting();
             app.UseAuthorization();
+
+            // Custom Middleware for HTMX
+            app.UseHtmxProcessor(); // Must be added before app.UseEndpoints middleware
+
 
             app.UseEndpoints(endpoints =>
             {

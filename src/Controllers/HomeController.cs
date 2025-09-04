@@ -12,7 +12,7 @@ namespace ContosoUniversity.Controllers
 
         public IActionResult Index()
         {
-            return View();
+            return ViewComponent(typeof(IndexViewComponent));
         }
 
         public async Task<ActionResult> About()

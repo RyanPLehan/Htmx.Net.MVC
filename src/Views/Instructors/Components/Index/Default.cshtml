@@ -57,8 +57,7 @@
                        hx-trigger="click"
                        hx-get="index?id=@item.ID"
                        hx-target="#instructor-courses"
-                       hx-swap="innerHTML"
-                       hx-push-url="index?id=@item.ID">
+                       hx-swap="innerHTML">
                         Select
                     </a> |
                     <a asp-action="Edit" asp-route-id="@item.ID">Edit</a> |
