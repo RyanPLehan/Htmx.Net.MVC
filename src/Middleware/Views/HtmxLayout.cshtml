@@ -1,9 +1,11 @@
-﻿<!DOCTYPE html>
+﻿@model ContosoUniversity.Middleware.Views.HtmxLayoutModel
+
+<!DOCTYPE html>
 <html>
 <head>
     <meta charset="utf-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-    <title>@ViewData["Title"] - Contoso University</title>
+    <title>Contoso University</title>
 
     <environment include="Development">
         <link rel="stylesheet" href="~/lib/bootstrap/dist/css/bootstrap.css" />
@@ -110,7 +112,12 @@
     <div class="container">
         <partial name="_CookieConsentPartial" />
         <main role="main" id="root" class="pb-3">
-            @RenderBody()
+            <div hx-trigger="load"
+                 hx-get="@Model.Route"
+                 hx-target="#root"
+                 hx-swap="innerHTML"
+                 hx-push-url="@Model.Route">
+            </div>
         </main>
     </div>
 
@@ -127,7 +134,5 @@
 
     <script src="~/lib/htmx/htmx.min-2.0.6.js" defer></script>
     <script src="~/js/site.js" asp-append-version="true"></script>
-
-    @RenderSection("Scripts", required: false)
 </body>
 </html>

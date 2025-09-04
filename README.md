@@ -36,3 +36,36 @@ The following controllers and their respective methods were changed.  This, in-t
 |  |  |  | Index.cshtml | Enrollments.cshtml |
 | DepartmentsController | Index | IndexViewComponent | Index.cshtml | Default.cshtml |
 
+## Branch: 04-DirectRoute
+Up to this point, all the Navigation Bar links, with the exception of the Contoso University logo and the Home, will update in place with HTML fragments from their respective url.
+
+Howerver, many times users will have saved a link to a specific route, such that, the browser will by pass the website's default landing page.  For example, while the application is running and you open a new tab in your browser and paste: https://localhost:5001/departments  (localhost:5001 is my server), you will get an HTML fragment of the Departments.
+
+This is a problem with using HTMX for the following reasons:
+1. Bypassing the landing page may not load the following:
+    - Logo(s)
+    - Headers
+    - Navigation Bar
+    - Footer
+    - CSS
+    - Javascript libraries, such as HTMX
+2. Going to a direct route will execute a component that may have the following results:
+    - Return a fragmented HTML page without HTMX to place it into the proper DOM element.
+    - May experience a runtime error due to dependencies of HTMX related properties (ie. checking for hx-* keys in the request header)
+
+The following are solutions to address this issue:
+1. Redirect to default Landing Page
+    - This would require a check for the presence of HX-Request key in the Request header.  If the key is not present then the application will issue a redirect.
+        - This will need to be coded either in each View Component, Controller, or some type of general middleware code.
+    - This may be not be suitable for most users.
+2. For every view component, create a corresponding full view.  Again, checking for HX-Rquest key in the Request header, a condition statement will be used to return either a full or fragmented HTML page.
+3. Write a piece of middleware code to check for existence of the HX-Request key in the Request header.  Then do **one** of the following options:
+    - If the key is present, then allow the request to move through the pipeline.  Thus executing the view component.
+    - If the key is not present, then do **one** of the following:
+        - Check if the URL is the base url to the home page, if so, just return the default Landing Page
+        - Construct a modified Landing Page, but pass just the route portion of the url into landing page, such that, when the page is loaded, HTMX will issue a HTTP-GET to the route.
+
+For this demonstration, this applicaiton will choose solution #3, with the following modifications:
+1. Modify Contoso University Logo and Home navigation bar links to return HTML fragments.
+2. Create a generic landing page such that when the page loads, HTMX will automatically invoke a given route
+3. The given route will, by default, be the home page or the route passed in by the middelware component.
