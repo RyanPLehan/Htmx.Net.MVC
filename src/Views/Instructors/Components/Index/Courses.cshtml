@@ -2,7 +2,7 @@
 
 @if (Model.Any())
 {
-    <h3>Courses Taught by Selected Instructor</h3>
+    <h3>Courses Taught by: @ViewData["InstructorName"]</h3>
     <table class="table">
         <tr>
             <th></th>
@@ -20,9 +20,9 @@
             }
             <tr class="@selectedRow">
                 <td>
-                    <a href="index?courseID=@item.CourseID"
+                    <a href="?courseID=@item.CourseID"
                        hx-trigger="click"
-                       hx-get="index?courseID=@item.CourseID"
+                       hx-get="?courseID=@item.CourseID"
                        hx-target="#instructor-enrollments"
                        hx-swap="innerHTML">
                         Select

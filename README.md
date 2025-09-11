@@ -22,7 +22,7 @@ With each click of a navigation item, the content will change in-place without r
 The only navigation items that were not changed: Home and the Contoso University Logo.
 These items will still cause a complete page refresh.  This was intentional so that one can see the difference between a complete page refresh and a DOM manipulation done by HTMX.
 
-The following controllers and their respective methods were changed.  This, in-turn, required a corresponding creation of a View Component class, with the respective Route name and one or more Views that will render a HTML fragment.  For directory structure, please see [View Components](https://learn.microsoft.com/en-us/aspnet/core/mvc/views/view-components?view=aspnetcore-8.0)
+The following controllers and their respective routes were changed.  This, in-turn, required a corresponding creation of a View Component class, with the respective Route name and one or more Views that will render a HTML fragment.  For directory structure, please see [View Components](https://learn.microsoft.com/en-us/aspnet/core/mvc/views/view-components?view=aspnetcore-8.0)
 
 | Controller | Route | View Component | Original View | New View |
 | :--------------- | :---------- | :-------------------- | :----------------- | :-----------------
@@ -67,5 +67,17 @@ The following are solutions to address this issue:
 
 For this demonstration, this applicaiton will choose solution #3, with the following modifications:
 1. Modify Contoso University Logo and Home navigation bar links to return HTML fragments.
-2. Create a generic landing page such that when the page loads, HTMX will automatically invoke a given route
+2. Create a generic landing page such that when the page loads, HTMX will automatically invoke a given route by using the 
 3. The given route will, by default, be the home page or the route passed in by the middelware component.
+
+## Branch: 05-CRUD
+This branch will specially deal with the Create Read Update and Delete (CRUD) operations.  For some routes, ie /Home/Departments, we perform a Read operation to display preliminary information to the user.  However, we will now dive deeper into each route/endpoint for enhanced CRUD operations.
+
+We will continue to use View Components, but the views will be displayed a [Modal Dialog](https://www.w3.org/WAI/ARIA/apg/patterns/dialog-modal/#:~:text=Dialog%20(Modal)%20Pattern-,About%20This%20Pattern,outside%20an%20active%20dialog%20window.)
+
+The following updates were performed:
+1. For proper Modal Dialog, an update of Bootstrap to version 5+ was performed.
+2. Remove of direct references to */index*
+3. Replace generic text with more descriptive text when items were selected.
+
+Ideas of using Modals/Dialogs with HTMX came from [Modal forms with Django+HTMX](https://blog.benoitblanchon.fr/django-htmx-modal-form/)

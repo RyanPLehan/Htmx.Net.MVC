@@ -5,16 +5,7 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
     <title>@ViewData["Title"] - Contoso University</title>
 
-    <environment include="Development">
-        <link rel="stylesheet" href="~/lib/bootstrap/dist/css/bootstrap.css" />
-    </environment>
-    <environment exclude="Development">
-        <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/twitter-bootstrap/4.1.3/css/bootstrap.css"
-              asp-fallback-href="~/lib/bootstrap/dist/css/bootstrap.css"
-              asp-fallback-test-class="sr-only" asp-fallback-test-property="position" asp-fallback-test-value="absolute"
-              crossorigin="anonymous"
-              integrity="sha256-eSi1q2PG6J7g7ib17yAaWMcrr5GrtohYChqibrV7PBE="/>
-    </environment>
+    <link rel="stylesheet" href="~/lib/bootstrap/dist/css/bootstrap.css" />
     <link rel="stylesheet" href="~/css/site.css" />
 </head>
 <body>
@@ -24,10 +15,10 @@
                 <a class="navbar-brand"
                    href="/home/index"
                    hx-trigger="click"
-                   hx-get="/home/index"
+                   hx-get="/home"
                    hx-target="#root"
                    hx-swap="innerHTML"
-                   hx-push-url="/home/index">
+                   hx-push-url="/home"">
                     Contoso University
                 </a>
                 <button class="navbar-toggler" type="button" data-toggle="collapse" data-target=".navbar-collapse" aria-controls="navbarSupportedContent"
@@ -38,12 +29,12 @@
                     <ul class="navbar-nav flex-grow-1">
                         <li class="nav-item">
                             <a class="nav-link text-dark" 
-                               href="/home/index"
+                               href="/home"
                                hx-trigger="click"
-                               hx-get="/home/index"
+                               hx-get="/home"
                                hx-target="#root"
                                hx-swap="innerHTML"
-                               hx-push-url="/home/index">
+                               hx-push-url="/home">
                                 Home
                             </a>
                         </li>
@@ -60,45 +51,45 @@
                         </li>
                         <li class="nav-item">
                             <a class="nav-link text-dark" 
-                               href="/students/index"
+                               href="/students"
                                hx-trigger="click"
-                               hx-get="/students/index"
+                               hx-get="/students"
                                hx-target="#root"
                                hx-swap="innerHTML"
-                               hx-push-url="/students/index">
+                               hx-push-url="/students">
                                 Students
                            </a>
                         </li>
                         <li class="nav-item">
                             <a class="nav-link text-dark"
-                               href="/courses/index"
+                               href="/courses"
                                hx-trigger="click"
-                               hx-get="/courses/index"
+                               hx-get="/courses"
                                hx-target="#root"
                                hx-swap="innerHTML"
-                               hx-push-url="/courses/index">
+                               hx-push-url="/courses">
                                 Courses
                            </a>
                         </li>
                         <li class="nav-item">
                             <a class="nav-link text-dark" 
-                               href="/instructors/index"
+                               href="/instructors"
                                hx-trigger="click"
-                               hx-get="/instructors/index"
+                               hx-get="/instructors"
                                hx-target="#root"
                                hx-swap="innerHTML"
-                               hx-push-url="/instructors/index">
+                               hx-push-url="/instructors">
                                 Instructors
                            </a>
                         </li>
                         <li class="nav-item">
                             <a class="nav-link text-dark"
-                               href="/departments/index"
+                               href="/departments"
                                hx-trigger="click"
-                               hx-get="/departments/index"
+                               hx-get="/departments"
                                hx-target="#root"
                                hx-swap="innerHTML"
-                               hx-push-url="/departments/index">
+                               hx-push-url="/departments">
                                 Departments
                             </a>
                         </li>
@@ -126,6 +117,7 @@
     </footer>
 
     <script src="~/lib/htmx/htmx.min-2.0.6.js" defer></script>
+    <script src="~/lib/bootstrap/dist/js/bootstrap.js" defer></script>
     <script src="~/js/site.js" asp-append-version="true"></script>
 
     @RenderSection("Scripts", required: false)

@@ -1,0 +1,48 @@
+﻿@model ContosoUniversity.Models.Department
+
+@{
+    ViewData["Title"] = "Delete";
+}
+
+<form class="modal-content"
+      hx-trigger="submit"
+      hx-post="/departments/delete">
+    <div class="modal-header">
+        <h5 class="modal-title">Delete Department</h5>
+    </div>
+    <div class="modal-body">
+        <dl class="row">
+            <dt class="col-sm-2">
+                @Html.DisplayNameFor(model => model.Name)
+            </dt>
+            <dd class="col-sm-10">
+                @Html.DisplayFor(model => model.Name)
+            </dd>
+            <dt class="col-sm-2">
+                @Html.DisplayNameFor(model => model.Budget)
+            </dt>
+            <dd class="col-sm-10">
+                @Html.DisplayFor(model => model.Budget)
+            </dd>
+            <dt class="col-sm-2">
+                @Html.DisplayNameFor(model => model.StartDate)
+            </dt>
+            <dd class="col-sm-10">
+                @Html.DisplayFor(model => model.StartDate)
+            </dd>
+            <dt class="col-sm-2">
+                @Html.DisplayNameFor(model => model.Administrator)
+            </dt>
+            <dd class="col-sm-10">
+                @Html.DisplayFor(model => model.Administrator.FullName)
+            </dd>
+        </dl>
+        <div class="text-danger" id="#error-message"></div>
+    </div>
+    <div class="modal-footer">
+            <input type="hidden" name="DepartmentID" value="@Model.DepartmentID" />
+            <input type="hidden" name="RowVersion" value="@Model.RowVersion" />
+            <button type="submit" class="btn btn-default btn-danger">Delete</button>
+            <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cancel</button>
+    </div>
+</form>

@@ -21,9 +21,10 @@ namespace ContosoUniversity.Controllers
         }
 
         // GET: Departments
-        public async Task<IActionResult> Index()
+        public async Task<IActionResult> Index(bool? loadDetails)
         {
-            return ViewComponent(typeof(IndexViewComponent));
+            var parameters = new { loadDetails = loadDetails };
+            return ViewComponent(typeof(IndexViewComponent), parameters);
         }
 
         // GET: Departments/Details/5
@@ -177,65 +178,60 @@ namespace ContosoUniversity.Controllers
         }
 
         // GET: Departments/Delete/5
-        public async Task<IActionResult> Delete(int? id, bool? concurrencyError)
+        public async Task<IActionResult> Delete(int? id)
         {
-            if (id == null)
-            {
-                return NotFound();
-            }
-
             var department = await _context.Departments
-                .Include(d => d.Administrator)
-                .AsNoTracking()
-                .FirstOrDefaultAsync(m => m.DepartmentID == id);
+                                           .AsNoTracking()
+                                           .Include(x => x.Administrator)
+                                           .FirstOrDefaultAsync(x => x.DepartmentID == id.GetValueOrDefault());
+
             if (department == null)
             {
-                if (concurrencyError.GetValueOrDefault())
-                {
-                    return RedirectToAction(nameof(Index));
-                }
+                this.HttpContext.Response.Headers.Append("HX-Location", "/Departments?details=true");
+                this.HttpContext.Response.Headers.Append("HX-Retarget", "#shell-content");
+                this.HttpContext.Response.Headers.Append("HX-Reswap", "innerHTML");
                 return NotFound();
             }
 
-            if (concurrencyError.GetValueOrDefault())
-            {
-                ViewData["ConcurrencyErrorMessage"] = "The record you attempted to delete "
-                    + "was modified by another user after you got the original values. "
-                    + "The delete operation was canceled and the current values in the "
-                    + "database have been displayed. If you still want to delete this "
-                    + "record, click the Delete button again. Otherwise "
-                    + "click the Back to List hyperlink.";
-            }
-
-            return View(department);
+            return ViewComponent(typeof(DeleteViewComponent), department);
         }
+
+
         // POST: Departments/Delete/5
         [HttpPost]
-        [ValidateAntiForgeryToken]
+        //[ValidateAntiForgeryToken]
         public async Task<IActionResult> Delete(Department department)
         {
             try
             {
-                if (await _context.Departments.AnyAsync(m => m.DepartmentID == department.DepartmentID))
+                var departmentToDelete = await _context.Departments
+                                                       .Where(x => x.DepartmentID == department.DepartmentID)
+                                                       .FirstOrDefaultAsync();             
+                
+                if (departmentToDelete != null)
                 {
-                    var departmentToDelete = await _context.Departments
-                                                           .Where(x => x.DepartmentID == department.DepartmentID)
-                                                           .FirstOrDefaultAsync();
                     _context.Departments.Remove(departmentToDelete);
                     await _context.SaveChangesAsync();
                 }
-                return RedirectToAction(nameof(Index));
+
+                this.HttpContext.Response.Headers.Append("HX-Trigger", "departmentListChanged");
+                return Ok();
             }
+
             catch (DbUpdateConcurrencyException /* ex */)
             {
-                //Log the error (uncomment ex variable name and write a log.)
-                return RedirectToAction(nameof(Delete), new { concurrencyError = true, id = department.DepartmentID });
+                string errorMsg = "The record you attempted to delete "
+                        + "was modified by another user after you got the original values. "
+                        + "The delete operation was canceled and the current values in the "
+                        + "database have been displayed. If you still want to delete this "
+                        + "record, click the Delete button again. Otherwise "
+                        + "click the Back to List hyperlink.";
+
+                this.HttpContext.Response.Headers.Append("HX-Retarget", "#error-message");
+                this.HttpContext.Response.Headers.Append("HX-Reswap", "innerHTML");
+                return Ok(errorMsg);
             }
         }
 
-        private bool DepartmentExists(int id)
-        {
-            return _context.Departments.Any(e => e.DepartmentID == id);
-        }
     }
 }
