@@ -16,6 +16,8 @@ namespace ContosoUniversity.ViewComponents.Departments
 
         public async Task<IViewComponentResult> InvokeAsync(Department department)
         {
+            ViewData["Action"] = "Delete";
+            ViewData["PostUrl"] = "/departments/delete";
             return View(department);
         }
     }

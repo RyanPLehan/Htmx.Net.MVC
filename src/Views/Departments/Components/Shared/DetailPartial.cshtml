@@ -1,0 +1,32 @@
+﻿@model ContosoUniversity.Models.Department
+
+@{
+    if (!ViewData.ContainsKey("IsReadonly"))
+    { ViewData["IsReadonly"] = false; }
+
+    bool isReadonly = false;
+    Boolean.TryParse(ViewData["IsReadonly"].ToString(), out isReadonly);
+
+    string readOnly = isReadonly ? "readonly" : String.Empty;
+}
+
+
+<dl class="row">
+    <dt class="col-sm-2">Name</dt>
+    <dd class="col-sm-10">
+        <input type="text" class="form-control" @readOnly value="@Html.DisplayFor(model => model.Name)" />
+    </dd>
+    <dt class="col-sm-2">Budget</dt>
+    <dd class="col-sm-10">
+        <input type="text" class="form-control" @readOnly value="@Html.DisplayFor(model => model.Budget)" />
+    </dd>
+    <dt class="col-sm-2">Start Date</dt>
+    <dd class="col-sm-10">
+        <input type="text" class="form-control" @readOnly value="@Html.DisplayFor(model => model.StartDate)" />
+    </dd>
+    <dt class="col-sm-2">Administrator</dt>
+    <dd class="col-sm-10">
+        <input type="text" class="form-control" @readOnly value="@Html.DisplayFor(model => model.Administrator.FullName)" />
+    </dd>
+</dl>
+

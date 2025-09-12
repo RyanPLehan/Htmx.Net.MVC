@@ -81,3 +81,5 @@ The following updates were performed:
 3. Replace generic text with more descriptive text when items were selected.
 
 Ideas of using Modals/Dialogs with HTMX came from [Modal forms with Django+HTMX](https://blog.benoitblanchon.fr/django-htmx-modal-form/)
+
+One of the main issues, with the original MS Contoso University application, is that for every detailed CRUD operation, there is a corresponding view.  These views usually only differ by layout and buttons.  Therefore, going to create a single dialog view with other elements that are needed for the specific CRUD operation.
