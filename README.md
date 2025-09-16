@@ -1,16 +1,13 @@
 # Htmx.Net.MVC
-A sample tutorial to show how to use HTMX and Tailwind in a standard .Net MVC application.  This tutorial will use the [Microsoft Contoso University](https://github.com/dotnet/AspNetCore.Docs/tree/main/aspnetcore/data/ef-mvc/intro/samples/5cu) MVC sample application, originally written in .Net 5, as the base line.
+A sample tutorial to show how to use HTMX in a standard .Net MVC application.  This tutorial will use the [Microsoft Contoso University](https://github.com/dotnet/AspNetCore.Docs/tree/main/aspnetcore/data/ef-mvc/intro/samples/5cu) MVC sample application, originally written in .Net 5, as the base line.
 
 To show progression, and to allow for easier download, I will use separate branches with a naming convention that should be easy to follow.  All branches will begin with *Progressions/* followed by the name in sequential order.
 
-### Derivations
-The following are derivations that I applied to the original MS sample application.
+## Branch: 01-Baseline
+This is the original MS Contoso University sample ASP.Net MVC application with the following changes applied.
 1. Upgrade from .Net 5 to .Net 8 (Core)
 2. Removed dependency on MSSQL in favor of an in-memory SQLite.
     -  Database is recreated everytime the application starts up.
-
-## Branch: 01-Baseline
-This is the original MS Contoso University sample .Net MVC application with the forementioned derivations applied.
 
 ## Branch: 02-HTMX
 Here we have removed the jQuery libraries and have added the HTMX library.  The HTMX library will allow our HTML application to make HTTP Requests using any of the following HTTP verbs: GET, POST, PUT, PATCH, DELETE.  Even though we have added the HTMX library, we are not using any of the HTMX attributes/functionality.
@@ -73,7 +70,7 @@ For this demonstration, this applicaiton will choose solution #3, with the follo
 ## Branch: 05-CRUD
 This branch will specially deal with the Create Read Update and Delete (CRUD) operations.  For some routes, ie /Home/Departments, we perform a Read operation to display preliminary information to the user.  However, we will now dive deeper into each route/endpoint for enhanced CRUD operations.
 
-We will continue to use View Components, but the views will be displayed a [Modal Dialog](https://www.w3.org/WAI/ARIA/apg/patterns/dialog-modal/#:~:text=Dialog%20(Modal)%20Pattern-,About%20This%20Pattern,outside%20an%20active%20dialog%20window.)
+We will continue to use View Components, but the views will display a [Modal Dialog](https://www.w3.org/WAI/ARIA/apg/patterns/dialog-modal/#:~:text=Dialog%20(Modal)%20Pattern-,About%20This%20Pattern,outside%20an%20active%20dialog%20window.)
 
 The following updates were performed:
 1. For proper Modal Dialog, an update of Bootstrap to version 5+ was performed.
@@ -82,4 +79,4 @@ The following updates were performed:
 
 Ideas of using Modals/Dialogs with HTMX came from [Modal forms with Django+HTMX](https://blog.benoitblanchon.fr/django-htmx-modal-form/)
 
-One of the main issues, with the original MS Contoso University application, is that for every detailed CRUD operation, there is a corresponding view.  These views usually only differ by layout and buttons.  Therefore, going to create a single dialog view with other elements that are needed for the specific CRUD operation.
+One of the main issues, with the original MS Contoso University application, is that for every Route CRUD operation, there is a corresponding view.  These views usually only differ by layout and buttons.  Therefore, for each Route, there is a single partial view to display entity details, thus leaving a CRUD operation specific view as the parent.
