@@ -5,11 +5,11 @@ using Microsoft.EntityFrameworkCore;
 
 namespace ContosoUniversity.ViewComponents.Departments
 {
-    public class DeleteViewComponent : ViewComponent
+    public class DetailViewComponent : ViewComponent
     {
         private readonly SchoolContext _context;
 
-        public DeleteViewComponent(SchoolContext context)
+        public DetailViewComponent(SchoolContext context)
         {
             _context = context;
         }

@@ -3,16 +3,16 @@
 
 <form class="modal-content"
       hx-trigger="submit"
-      hx-post="/departments/delete">
+      hx-post="/departments/create">
     <div class="modal-header">
-        <h5 class="modal-title">Delete Department</h5>
+        <h5 class="modal-title">Create Department</h5>
     </div>
     <div class="modal-body">
         @Html.Partial("../Shared/DetailPartial.cshtml", Model)
         <div class="text-danger" id="error-message"></div>
     </div>
     <div class="modal-footer">
-            <button type="submit" class="btn btn-default btn-danger">Delete</button>
+            <button type="submit" class="btn btn-primary">Save</button>
             <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cancel</button>
     </div>
 </form>

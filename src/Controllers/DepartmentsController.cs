@@ -1,13 +1,14 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Threading.Tasks;
+﻿using ContosoUniversity.Data;
+using ContosoUniversity.Models;
+using ContosoUniversity.ViewComponents.Departments;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.AspNetCore.Mvc.Rendering;
 using Microsoft.EntityFrameworkCore;
-using ContosoUniversity.Data;
-using ContosoUniversity.Models;
-using ContosoUniversity.ViewComponents.Departments;
+using Microsoft.VisualBasic;
+using System;
+using System.Collections.Generic;
+using System.Linq;
+using System.Threading.Tasks;
 
 namespace ContosoUniversity.Controllers
 {
@@ -30,96 +31,98 @@ namespace ContosoUniversity.Controllers
         // GET: Departments/Details/5
         public async Task<IActionResult> Details(int? id)
         {
-            if (id == null)
-            {
-                return NotFound();
-            }
-
-            //string query = "SELECT * FROM Department WHERE DepartmentID = {0}";
             var department = await _context.Departments
-                .AsNoTracking()
-                .Where(x => x.DepartmentID == id)
-                .Include(d => d.Administrator)
-                .FirstOrDefaultAsync();
+                                           .AsNoTracking()
+                                           .Include(x => x.Administrator)
+                                           .FirstOrDefaultAsync(x => x.DepartmentID == id.GetValueOrDefault());
 
             if (department == null)
             {
+                this.HttpContext.Response.Headers.Append("HX-Location", "/Departments?loadDetails=true");
+                this.HttpContext.Response.Headers.Append("HX-Retarget", "#shell-content");
+                this.HttpContext.Response.Headers.Append("HX-Reswap", "innerHTML");
                 return NotFound();
             }
 
-            return View(department);
+            return ViewComponent(typeof(DetailViewComponent), department);
         }
 
         // GET: Departments/Create
-        public IActionResult Create()
+        public async Task<IActionResult> Create()
         {
-            ViewData["InstructorID"] = new SelectList(_context.Instructors, "ID", "FullName");
-            return View();
+            var instructors = await _context.Instructors.ToArrayAsync();
+            ViewData["Instructors"] = new SelectList(instructors, "ID", "FullName");
+            return ViewComponent(typeof(CreateViewComponent), new Department());
         }
 
         // POST: Departments/Create
         // To protect from overposting attacks, please enable the specific properties you want to bind to, for 
         // more details see http://go.microsoft.com/fwlink/?LinkId=317598.
         [HttpPost]
-        [ValidateAntiForgeryToken]
-        public async Task<IActionResult> Create([Bind("DepartmentID,Name,Budget,StartDate,InstructorID")] Department department)
+        //[ValidateAntiForgeryToken]
+        public async Task<IActionResult> Create(Department department)
         {
             if (ModelState.IsValid)
             {
                 _context.Add(department);
                 await _context.SaveChangesAsync();
-                return RedirectToAction(nameof(Index));
+
+                this.HttpContext.Response.Headers.Append("HX-Trigger", "listChanged");
+                return Ok();
             }
-            ViewData["InstructorID"] = new SelectList(_context.Instructors, "ID", "FullName", department.InstructorID);
-            return View(department);
+            else
+            {
+                string errorMsg = "The department you attempted to create is invalid.  Please make the appropriate corrections.";
+
+                this.HttpContext.Response.Headers.Append("HX-Retarget", "#error-message");
+                this.HttpContext.Response.Headers.Append("HX-Reswap", "innerHTML");
+                return Ok(errorMsg);
+            }
         }
 
         // GET: Departments/Edit/5
         public async Task<IActionResult> Edit(int? id)
         {
-            if (id == null)
-            {
-                return NotFound();
-            }
-
             var department = await _context.Departments
-                .Include(i => i.Administrator)
-                .AsNoTracking()
-                .FirstOrDefaultAsync(m => m.DepartmentID == id);
+                                           .AsNoTracking()
+                                           .Include(i => i.Administrator)
+                                           .Where(x => x.DepartmentID == id.GetValueOrDefault())
+                                           .FirstOrDefaultAsync();
 
             if (department == null)
             {
                 return NotFound();
             }
-            ViewData["InstructorID"] = new SelectList(_context.Instructors, "ID", "FullName", department.InstructorID);
-            return View(department);
+
+            var instructors = await _context.Instructors.ToArrayAsync();
+            ViewData["Instructors"] = new SelectList(instructors, "ID", "FullName", department.InstructorID);
+            return ViewComponent(typeof(EditViewComponent), department);
         }
 
         // POST: Departments/Edit/5
         // To protect from overposting attacks, please enable the specific properties you want to bind to, for 
         // more details see http://go.microsoft.com/fwlink/?LinkId=317598.
         [HttpPost]
-        [ValidateAntiForgeryToken]
-        public async Task<IActionResult> Edit(int? id, byte[] rowVersion)
+        //[ValidateAntiForgeryToken]
+        public async Task<IActionResult> Edit(Department department)
         {
-            if (id == null)
-            {
-                return NotFound();
-            }
+            if (department == null)
+                return Ok();
 
-            var departmentToUpdate = await _context.Departments.Include(i => i.Administrator).FirstOrDefaultAsync(m => m.DepartmentID == id);
+            var departmentToUpdate = await _context.Departments
+                                                   .Where(x => x.DepartmentID == department.DepartmentID)
+                                                   .FirstOrDefaultAsync();
 
             if (departmentToUpdate == null)
             {
-                Department deletedDepartment = new Department();
-                await TryUpdateModelAsync(deletedDepartment);
-                ModelState.AddModelError(string.Empty,
-                    "Unable to save changes. The department was deleted by another user.");
-                ViewData["InstructorID"] = new SelectList(_context.Instructors, "ID", "FullName", deletedDepartment.InstructorID);
-                return View(deletedDepartment);
+                string errorMsg = "Unable to save changes. The department was deleted by another user.";
+
+                this.HttpContext.Response.Headers.Append("HX-Retarget", "#error-message");
+                this.HttpContext.Response.Headers.Append("HX-Reswap", "innerHTML");
+                return Ok(errorMsg);
             }
 
-            _context.Entry(departmentToUpdate).Property("RowVersion").OriginalValue = rowVersion;
+            _context.Entry(departmentToUpdate).Property("RowVersion").OriginalValue = department.RowVersion;
 
             if (await TryUpdateModelAsync<Department>(
                 departmentToUpdate,
@@ -129,52 +132,21 @@ namespace ContosoUniversity.Controllers
                 try
                 {
                     await _context.SaveChangesAsync();
-                    return RedirectToAction(nameof(Index));
+                    this.HttpContext.Response.Headers.Append("HX-Trigger", "listChanged");
+                    return Ok();
                 }
                 catch (DbUpdateConcurrencyException ex)
                 {
-                    var exceptionEntry = ex.Entries.Single();
-                    var clientValues = (Department)exceptionEntry.Entity;
-                    var databaseEntry = exceptionEntry.GetDatabaseValues();
-                    if (databaseEntry == null)
-                    {
-                        ModelState.AddModelError(string.Empty,
-                            "Unable to save changes. The department was deleted by another user.");
-                    }
-                    else
-                    {
-                        var databaseValues = (Department)databaseEntry.ToObject();
+                    string errorMsg = "The record you attempted to edit "
+                                + "was modified by another user after you got the original value. "
+                                + "Go back to the list to review new values.";
 
-                        if (databaseValues.Name != clientValues.Name)
-                        {
-                            ModelState.AddModelError("Name", $"Current value: {databaseValues.Name}");
-                        }
-                        if (databaseValues.Budget != clientValues.Budget)
-                        {
-                            ModelState.AddModelError("Budget", $"Current value: {databaseValues.Budget:c}");
-                        }
-                        if (databaseValues.StartDate != clientValues.StartDate)
-                        {
-                            ModelState.AddModelError("StartDate", $"Current value: {databaseValues.StartDate:d}");
-                        }
-                        if (databaseValues.InstructorID != clientValues.InstructorID)
-                        {
-                            Instructor databaseInstructor = await _context.Instructors.FirstOrDefaultAsync(i => i.ID == databaseValues.InstructorID);
-                            ModelState.AddModelError("InstructorID", $"Current value: {databaseInstructor?.FullName}");
-                        }
-
-                        ModelState.AddModelError(string.Empty, "The record you attempted to edit "
-                                + "was modified by another user after you got the original value. The "
-                                + "edit operation was canceled and the current values in the database "
-                                + "have been displayed. If you still want to edit this record, click "
-                                + "the Save button again. Otherwise click the Back to List hyperlink.");
-                        departmentToUpdate.RowVersion = (byte[])databaseValues.RowVersion;
-                        ModelState.Remove("RowVersion");
-                    }
+                    this.HttpContext.Response.Headers.Append("HX-Retarget", "#error-message");
+                    this.HttpContext.Response.Headers.Append("HX-Reswap", "innerHTML");
+                    return Ok(errorMsg);
                 }
             }
-            ViewData["InstructorID"] = new SelectList(_context.Instructors, "ID", "FullName", departmentToUpdate.InstructorID);
-            return View(departmentToUpdate);
+            return Ok();
         }
 
         // GET: Departments/Delete/5
@@ -210,6 +182,7 @@ namespace ContosoUniversity.Controllers
                 
                 if (departmentToDelete != null)
                 {
+                    _context.Entry(departmentToDelete).Property("RowVersion").OriginalValue = department.RowVersion;
                     _context.Departments.Remove(departmentToDelete);
                     await _context.SaveChangesAsync();
                 }

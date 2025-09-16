@@ -19,16 +19,28 @@
             @Html.DisplayFor(modelItem => item.Administrator.FullName)
         </td>
         <td>
-            <a asp-action="Edit" asp-route-id="@item.DepartmentID">Edit</a>
+            <a href="/departments/edit/@item.DepartmentID"
+               hx-trigger="click"
+               hx-get="/departments/edit/@item.DepartmentID"
+               hx-target="#dialog"
+               hx-swap="innerHTML">
+                Edit
+            </a>
             | 
-            <a asp-action="Details" asp-route-id="@item.DepartmentID">Details</a>
+            <a href="/departments/details/@item.DepartmentID"
+               hx-trigger="click"
+               hx-get="/departments/details/@item.DepartmentID"
+               hx-target="#dialog"
+               hx-swap="innerHTML">
+                Details
+            </a>
             |                
             <a href="/departments/delete/@item.DepartmentID"
                 hx-trigger="click"
                 hx-get="/departments/delete/@item.DepartmentID"
                 hx-target="#dialog"
                 hx-swap="innerHTML">
-                    Delete
+                 Delete
             </a>
         </td>
     </tr>

@@ -1,26 +1,25 @@
 ﻿@model ContosoUniversity.Models.Department
 
-
-
 <form class="modal-content"
       hx-trigger="submit"
-      hx-post="/departments/delete">
+      hx-post="/departments/edit">
     <div class="modal-header">
-        <h5 class="modal-title">Delete Department</h5>
+        <h5 class="modal-title">Details Department</h5>
     </div>
     <div class="modal-body">
         @Html.Partial("../Shared/DetailPartial.cshtml", Model)
-        <div class="text-danger" id="#error-message"></div>
+        <div class="text-danger" id="error-message"></div>
     </div>
     <div class="modal-footer">
-            <button type="button" class="btn btn-default btn-dark">Edit</button>
+            <button type="button"
+                    class="btn btn-primary"
+                    hx-trigger="click"
+                    hx-get="/departments/edit/@Model.DepartmentID"
+                    hx-target="#dialog"
+                    hx-swap="innerHTML">
+                        Edit
+            </button>
             <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cancel</button>
     </div>
 </form>
 
-
-    <div class="modal-footer">
-        <a asp-action="Edit" asp-route-id="@Model.DepartmentID">Edit</a> |
-        <a asp-action="Index">Back to List</a>
-    </div>
-</div>

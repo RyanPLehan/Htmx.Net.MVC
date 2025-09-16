@@ -5,18 +5,18 @@ using Microsoft.EntityFrameworkCore;
 
 namespace ContosoUniversity.ViewComponents.Departments
 {
-    public class DeleteViewComponent : ViewComponent
+    public class CreateViewComponent : ViewComponent
     {
         private readonly SchoolContext _context;
 
-        public DeleteViewComponent(SchoolContext context)
+        public CreateViewComponent(SchoolContext context)
         {
             _context = context;
         }
 
         public async Task<IViewComponentResult> InvokeAsync(Department department)
         {
-            ViewData["IsReadOnly"] = true;
+            ViewData["IsReadOnly"] = false;
             return View(department);
         }
     }

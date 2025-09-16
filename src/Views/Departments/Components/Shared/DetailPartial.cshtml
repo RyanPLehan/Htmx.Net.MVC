@@ -2,31 +2,56 @@
 
 @{
     if (!ViewData.ContainsKey("IsReadonly"))
-    { ViewData["IsReadonly"] = false; }
+    { ViewData["IsReadonly"] = true; }
 
-    bool isReadonly = false;
+    bool isReadonly = true;
     Boolean.TryParse(ViewData["IsReadonly"].ToString(), out isReadonly);
 
     string readOnly = isReadonly ? "readonly" : String.Empty;
+
+
+    IEnumerable<SelectListItem> listItems = Enumerable.Empty<SelectListItem>();
+    if (ViewData.ContainsKey("Instructors"))
+    {
+        listItems = (IEnumerable<SelectListItem>)ViewData["Instructors"];
+    }
+
+    if (Model.StartDate == null || Model.StartDate == DateTime.MinValue)
+    { Model.StartDate = DateTime.Today; }
 }
 
 
 <dl class="row">
     <dt class="col-sm-2">Name</dt>
     <dd class="col-sm-10">
-        <input type="text" class="form-control" @readOnly value="@Html.DisplayFor(model => model.Name)" />
+        <input type="text" class="form-control" @readOnly 
+               name="Name" value="@Html.DisplayFor(model => model.Name)" />
     </dd>
     <dt class="col-sm-2">Budget</dt>
     <dd class="col-sm-10">
-        <input type="text" class="form-control" @readOnly value="@Html.DisplayFor(model => model.Budget)" />
+        <input type="text" class="form-control" @readOnly 
+               name="Budget" value="@Html.DisplayFor(model => model.Budget)" />
     </dd>
     <dt class="col-sm-2">Start Date</dt>
     <dd class="col-sm-10">
-        <input type="text" class="form-control" @readOnly value="@Html.DisplayFor(model => model.StartDate)" />
+        <input type="text" class="form-control" @readOnly 
+               name="StartDate" value="@Html.DisplayFor(model => model.StartDate)" />
     </dd>
     <dt class="col-sm-2">Administrator</dt>
     <dd class="col-sm-10">
-        <input type="text" class="form-control" @readOnly value="@Html.DisplayFor(model => model.Administrator.FullName)" />
+        @if (!isReadonly && listItems.Any())
+        {
+            <select asp-for="InstructorID" class="form-control" asp-items=@listItems>
+                <option value="">-- Select Administrator --</option>
+            </select>
+        }
+        else
+        {
+            <input type="text" class="form-control" @readOnly
+                   name="InstructorID" value="@Html.DisplayFor(model => model.Administrator.FullName)" />
+        }
     </dd>
 </dl>
+<input type="hidden" name="DepartmentID" value="@Model.DepartmentID" />
+<input type="hidden" name="Version" value="@Model.Version" />
 
