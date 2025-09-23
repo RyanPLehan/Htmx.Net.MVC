@@ -21,6 +21,11 @@
 
   <ItemGroup>
     <Folder Include="Views\Home\Components\Privacy\" />
+    <Folder Include="Views\Students\Components\Create\" />
+    <Folder Include="Views\Students\Components\Detail\" />
+    <Folder Include="Views\Students\Components\Edit\" />
+    <Folder Include="Views\Students\Components\Delete\" />
+    <Folder Include="Views\Students\Components\Shared\" />
     <Folder Include="wwwroot\lib\htmx\" />
   </ItemGroup>
 

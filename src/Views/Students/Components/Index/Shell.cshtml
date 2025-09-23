@@ -1,0 +1,86 @@
+﻿@{
+    ViewData["Title"] = "Students";
+}
+
+<h1>Students</h1>
+
+<p>
+    <a href="/students/create"
+       hx-trigger="click"
+       hx-get="/students/create"
+       hx-target="#dialog"
+       hx-swap="innerHTML">
+        Create New
+    </a>
+</p>
+
+<form hx-trigger="submit"
+      hx-get=""
+      hx-target="#detailList"
+      hx-swap="innerHTML">
+    <div class="form-actions no-color">
+        <p>
+            <label>Find by name: <input type="text" name="SearchString" value="@ViewData["CurrentFilter"]" /></label>
+            <input type="submit" value="Search" class="btn btn-primary" />
+            |
+            <a href="/students?pageNumber=1"
+               hx-trigger="click"
+               hx-get="/students?pageNumber=1"
+               hx-target="#detailList"
+               hx-swap="innerHTML"
+               hx-push-url="/students">
+                Back to Full List
+            </a>
+        </p>
+    </div>
+</form>
+
+
+<table class="table">
+    <thead>
+        <tr>
+            <th>
+                <a href="?sortOrder=@ViewData["NameSortParm"]&currentFilter=@ViewData["CurrentFilter"]"
+                   hx-trigger="click"
+                   hx-get="?sortOrder=@ViewData["NameSortParm"]&currentFilter=@ViewData["CurrentFilter"]"
+                   hx-target="#detailList"
+                   hx-swap="innerHTML">
+                    Last Name
+                </a>
+            </th>
+            <th>
+                First Name
+            </th>
+            <th>
+                <a href="?sortOrder=@ViewData["DateSortParm"]&currentFilter=@ViewData["CurrentFilter"]"
+                   hx-trigger="click"
+                   hx-get="?sortOrder=@ViewData["DateSortParm"]&currentFilter=@ViewData["CurrentFilter"]"
+                   hx-target="#detailList"
+                   hx-swap="innerHTML">
+                    Enrollment Date
+                </a>
+            </th>
+            <th></th>
+        </tr>
+    </thead>
+    <tbody id="detailList"
+           hx-trigger="load, listChanged from:body"
+           hx-get="?pageNumber=1"
+           hx-target="this"
+           hx-swap="innerHTML">
+        <tr>
+            <td class="spinner-border" role="status">
+                <span class="visually-hidden">Loading...</span>
+            </td>
+        </tr>
+    </tbody>
+</table>
+
+<div id="modal" class="modal fade">
+    <div id="dialog" 
+            class="modal-dialog modal-lg modal-dialog-centered"
+            hx-target="this">
+    </div>
+</div>
+
+<script src="~/js/dialog.js" asp-append-version="true" defer></script>

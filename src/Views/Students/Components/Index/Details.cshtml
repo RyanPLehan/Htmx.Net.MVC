@@ -1,0 +1,70 @@
+﻿@model PaginatedList<ContosoUniversity.Models.Student>
+
+@foreach (var item in Model) 
+{
+    <tr>
+        <td>
+            @Html.DisplayFor(modelItem => item.LastName)
+        </td>
+        <td>
+            @Html.DisplayFor(modelItem => item.FirstName)
+        </td>
+        <td>
+            @Html.DisplayFor(modelItem => item.EnrollmentDate)
+        </td>
+        <td>
+            <a href="/students/edit/@item.ID"
+               hx-trigger="click"
+               hx-get="/students/edit/@item.ID"
+               hx-target="#dialog"
+               hx-swap="innerHTML">
+                Edit
+            </a>
+            |
+            <a href="/students/details/@item.ID"
+               hx-trigger="click"
+               hx-get="/students/details/@item.ID"
+               hx-target="#dialog"
+               hx-swap="innerHTML">
+                Details
+            </a>
+            |
+            <a href="/students/delete/@item.ID"
+                hx-trigger="click"
+               hx-get="/students/delete/@item.ID"
+                hx-target="#dialog"
+                hx-swap="innerHTML">
+                 Delete
+            </a>
+        </td>
+    </tr>
+}
+
+<tfoot>
+    <tr>
+        <td colspan="3" style="border-bottom: none">
+            @{
+                var prevDisabled = !Model.HasPreviousPage ? "disabled" : "";
+                var nextDisabled = !Model.HasNextPage ? "disabled" : "";
+            }
+
+            <a class="btn btn-outline-primary @prevDisabled"
+               href="?sortOrder=@ViewData["CurrentSort"]&currentFilter=@ViewData["CurrentFilter"]&pageNumber=@(Model.PageIndex - 1)"
+               hx-trigger="click"
+               hx-get="?sortOrder=@ViewData["CurrentSort"]&currentFilter=@ViewData["CurrentFilter"]&pageNumber=@(Model.PageIndex - 1)"
+               hx-target="#detailList"
+               hx-swap="innerHTML">
+                Previous
+            </a>
+
+            <a class="btn btn-outline-primary @nextDisabled"
+               href="?sortOrder=@ViewData["CurrentSort"]&currentFilter=@ViewData["CurrentFilter"]&pageNumber=@(Model.PageIndex + 1)"
+               hx-trigger="click"
+               hx-get="?sortOrder=@ViewData["CurrentSort"]&currentFilter=@ViewData["CurrentFilter"]&pageNumber=@(Model.PageIndex + 1)"
+               hx-target="#detailList"
+               hx-swap="innerHTML">
+                Next
+            </a>
+        </td>
+    </tr>
+</tfoot>

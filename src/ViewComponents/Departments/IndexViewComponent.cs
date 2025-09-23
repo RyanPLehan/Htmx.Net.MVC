@@ -16,6 +16,7 @@ namespace ContosoUniversity.ViewComponents.Departments
 
         public async Task<IViewComponentResult> InvokeAsync(bool? loadDetails)
         {
+            // Shell should be loaded only once
             if (!loadDetails.GetValueOrDefault()) 
                 return View("Shell");
 

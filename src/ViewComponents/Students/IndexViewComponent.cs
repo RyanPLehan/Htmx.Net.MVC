@@ -23,6 +23,14 @@ namespace ContosoUniversity.ViewComponents.Students
                                                             string searchString,
                                                             int? pageNumber)
         {
+            // Shell should be loaded only once
+            if (String.IsNullOrWhiteSpace(sortOrder) &&
+                String.IsNullOrWhiteSpace(currentFilter) &&
+                String.IsNullOrWhiteSpace(searchString) &&
+                pageNumber.GetValueOrDefault() == 0)
+            { return View("Shell"); }
+
+
             ViewData["CurrentSort"] = sortOrder;
             ViewData["NameSortParm"] = String.IsNullOrEmpty(sortOrder) ? "name_desc" : "";
             ViewData["DateSortParm"] = sortOrder == "Date" ? "date_desc" : "Date";
@@ -45,7 +53,7 @@ namespace ContosoUniversity.ViewComponents.Students
             int pageSize = 3;
             PaginatedList<Student> students = await PaginatedList<Student>.CreateAsync(query.AsNoTracking(), pageNumber ?? 1, pageSize);
 
-            return View(students);
+            return View("Details", students);
         }
 
         private IQueryable<Student> ApplyFilter(IQueryable<Student> query, string searchString)

@@ -11,21 +11,20 @@
 </p>
 
 <form hx-trigger="submit"
-      hx-get="index"
+      hx-get=""
       hx-target="#root"
-      hx-swap="innerHTML"
-      hx-push-url="index">
+      hx-swap="innerHTML">
     <div class="form-actions no-color">
         <p>
             <label>Find by name: <input type="text" name="SearchString" value="@ViewData["CurrentFilter"]" /></label>
-            <input type="submit" value="Search" class="btn btn-default"/> 
+            <input type="submit" value="Search" class="btn btn-primary"/> 
             |
-            <a href="index"
+            <a href="/students"
                hx-trigger="click"
-               hx-get="index"
+               hx-get="/students"
                hx-target="#root"
                hx-swap="innerHTML"
-               hx-push-url="index">
+               hx-push-url="/students">
                 Back to Full List
             </a>
         </p>
@@ -36,12 +35,11 @@
     <thead>
         <tr>
             <th>
-                <a href="index?sortOrder=@ViewData["NameSortParm"]&currentFilter=@ViewData["CurrentFilter"]"
+                <a href="?sortOrder=@ViewData["NameSortParm"]&currentFilter=@ViewData["CurrentFilter"]"
                    hx-trigger="click"
-                   hx-get="index?sortOrder=@ViewData["NameSortParm"]&currentFilter=@ViewData["CurrentFilter"]"
+                   hx-get="?sortOrder=@ViewData["NameSortParm"]&currentFilter=@ViewData["CurrentFilter"]"
                    hx-target="#root"
-                   hx-swap="innerHTML"
-                   hx-push-url="index?sortOrder=@ViewData["NameSortParm"]&currentFilter=@ViewData["CurrentFilter"]">
+                   hx-swap="innerHTML">
                     Last Name
                 </a>
             </th>
@@ -49,12 +47,11 @@
                 First Name
             </th>
             <th>
-                <a href="index?sortOrder=@ViewData["DateSortParm"]&currentFilter=@ViewData["CurrentFilter"]"
+                <a href="?sortOrder=@ViewData["DateSortParm"]&currentFilter=@ViewData["CurrentFilter"]"
                    hx-trigger="click"
-                   hx-get="index?sortOrder=@ViewData["DateSortParm"]&currentFilter=@ViewData["CurrentFilter"]"
+                   hx-get="?sortOrder=@ViewData["DateSortParm"]&currentFilter=@ViewData["CurrentFilter"]"
                    hx-target="#root"
-                   hx-swap="innerHTML"
-                   hx-push-url="index?sortOrder=@ViewData["DateSortParm"]&currentFilter=@ViewData["CurrentFilter"]">
+                   hx-swap="innerHTML">
                     Enrollment Date
                 </a>
             </th>
@@ -89,22 +86,20 @@
     var nextDisabled = !Model.HasNextPage ? "disabled" : "";
 }
 
-<a class="btn btn-default @prevDisabled"
-   href="index?sortOrder=@ViewData["CurrentSort"]&currentFilter=@ViewData["CurrentFilter"]&pageNumber=@(Model.PageIndex - 1)"
+<a class="btn btn-outline-primary @prevDisabled"
+   href="?sortOrder=@ViewData["CurrentSort"]&currentFilter=@ViewData["CurrentFilter"]&pageNumber=@(Model.PageIndex - 1)"
    hx-trigger="click"
-   hx-get="index?sortOrder=@ViewData["CurrentSort"]&currentFilter=@ViewData["CurrentFilter"]&pageNumber=@(Model.PageIndex - 1)"
+   hx-get="?sortOrder=@ViewData["CurrentSort"]&currentFilter=@ViewData["CurrentFilter"]&pageNumber=@(Model.PageIndex - 1)"
    hx-target="#root"
-   hx-swap="innerHTML"
-   hx-push-url="index?sortOrder=@ViewData["CurrentSort"]&currentFilter=@ViewData["CurrentFilter"]&pageNumber=@(Model.PageIndex - 1)">
+   hx-swap="innerHTML">
     Previous
 </a>
 
-<a class="btn btn-default @nextDisabled"
-   href="index?sortOrder=@ViewData["CurrentSort"]&currentFilter=@ViewData["CurrentFilter"]&pageNumber=@(Model.PageIndex + 1)"
+<a class="btn btn-outline-primary @nextDisabled"
+   href="?sortOrder=@ViewData["CurrentSort"]&currentFilter=@ViewData["CurrentFilter"]&pageNumber=@(Model.PageIndex + 1)"
    hx-trigger="click"
-   hx-get="index?sortOrder=@ViewData["CurrentSort"]&currentFilter=@ViewData["CurrentFilter"]&pageNumber=@(Model.PageIndex + 1)"
+   hx-get="?sortOrder=@ViewData["CurrentSort"]&currentFilter=@ViewData["CurrentFilter"]&pageNumber=@(Model.PageIndex + 1)"
    hx-target="#root"
-   hx-swap="innerHTML"
-   hx-push-url="index?sortOrder=@ViewData["CurrentSort"]&currentFilter=@ViewData["CurrentFilter"]&pageNumber=@(Model.PageIndex + 1)">
+   hx-swap="innerHTML">
     Next
 </a>
