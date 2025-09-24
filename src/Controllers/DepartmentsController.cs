@@ -59,7 +59,7 @@ namespace ContosoUniversity.Controllers
         // To protect from overposting attacks, please enable the specific properties you want to bind to, for 
         // more details see http://go.microsoft.com/fwlink/?LinkId=317598.
         [HttpPost]
-        //[ValidateAntiForgeryToken]
+        [ValidateAntiForgeryToken]
         public async Task<IActionResult> Create(Department department)
         {
             if (ModelState.IsValid)
@@ -103,7 +103,7 @@ namespace ContosoUniversity.Controllers
         // To protect from overposting attacks, please enable the specific properties you want to bind to, for 
         // more details see http://go.microsoft.com/fwlink/?LinkId=317598.
         [HttpPost]
-        //[ValidateAntiForgeryToken]
+        [ValidateAntiForgeryToken]
         public async Task<IActionResult> Edit(Department department)
         {
             if (department == null)
@@ -171,7 +171,7 @@ namespace ContosoUniversity.Controllers
 
         // POST: Departments/Delete/5
         [HttpPost]
-        //[ValidateAntiForgeryToken]
+        [ValidateAntiForgeryToken]
         public async Task<IActionResult> Delete(Department department)
         {
             try
