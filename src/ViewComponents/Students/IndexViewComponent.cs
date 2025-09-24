@@ -28,7 +28,7 @@ namespace ContosoUniversity.ViewComponents.Students
                 String.IsNullOrWhiteSpace(currentFilter) &&
                 String.IsNullOrWhiteSpace(searchString) &&
                 pageNumber.GetValueOrDefault() == 0)
-            { return View("Shell"); }
+            { return View("Master"); }
 
 
             ViewData["CurrentSort"] = sortOrder;
@@ -60,8 +60,14 @@ namespace ContosoUniversity.ViewComponents.Students
         {
             if (!String.IsNullOrWhiteSpace(searchString))
             {
-                query = query.Where(q => q.LastName.Contains(searchString) ||
-                                         q.FirstName.Contains(searchString));
+                // EF Sqlite Client will generate INSTR() which is case-sensitive
+                //query = query.Where(q => q.LastName.Contains(searchString) ||
+                //                         q.FirstName.Contains(searchString));
+
+                // EF Sqlite Client will generate LIKE which is case-insensitive
+                string likePattern = $"%{searchString}%";
+                query = query.Where(q => EF.Functions.Like(q.LastName, likePattern) ||
+                                         EF.Functions.Like(q.FirstName, likePattern));
             }
             return query;
         }

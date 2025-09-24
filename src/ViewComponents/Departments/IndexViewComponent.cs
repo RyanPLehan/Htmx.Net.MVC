@@ -18,7 +18,7 @@ namespace ContosoUniversity.ViewComponents.Departments
         {
             // Shell should be loaded only once
             if (!loadDetails.GetValueOrDefault()) 
-                return View("Shell");
+                return View("Master");
 
 
             var departments = await _context.Departments
