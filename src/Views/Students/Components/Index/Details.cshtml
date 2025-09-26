@@ -49,18 +49,18 @@
             }
 
             <a class="btn btn-outline-primary @prevDisabled"
-               href="?sortOrder=@ViewData["CurrentSort"]&currentFilter=@ViewData["CurrentFilter"]&pageNumber=@(Model.PageIndex - 1)"
+               href="?columnName=@ViewData["ColumnName"]&sortOrder=@ViewData["SortOrder"]&filter=@ViewData["Filter"]&pageNumber=@(Model.PageIndex - 1)"
                hx-trigger="click"
-               hx-get="?sortOrder=@ViewData["CurrentSort"]&currentFilter=@ViewData["CurrentFilter"]&pageNumber=@(Model.PageIndex - 1)"
+               hx-get="?columnName=@ViewData["ColumnName"]&sortOrder=@ViewData["SortOrder"]&filter=@ViewData["Filter"]&pageNumber=@(Model.PageIndex - 1)"
                hx-target="#detailList"
                hx-swap="innerHTML">
                 Previous
             </a>
 
             <a class="btn btn-outline-primary @nextDisabled"
-               href="?sortOrder=@ViewData["CurrentSort"]&currentFilter=@ViewData["CurrentFilter"]&pageNumber=@(Model.PageIndex + 1)"
+               href="?columnName=@ViewData["ColumnName"]&sortOrder=@ViewData["SortOrder"]&filter=@ViewData["Filter"]&pageNumber=@(Model.PageIndex + 1)"
                hx-trigger="click"
-               hx-get="?sortOrder=@ViewData["CurrentSort"]&currentFilter=@ViewData["CurrentFilter"]&pageNumber=@(Model.PageIndex + 1)"
+               hx-get="?columnName=@ViewData["ColumnName"]&sortOrder=@ViewData["SortOrder"]&filter=@ViewData["Filter"]&pageNumber=@(Model.PageIndex + 1)"
                hx-target="#detailList"
                hx-swap="innerHTML">
                 Next

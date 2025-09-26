@@ -1,5 +1,6 @@
 ﻿; (function () {
     const modal = new bootstrap.Modal(document.getElementById("modal"))
+    //htmx.logAll();
 
     htmx.on("htmx:afterSwap", (e) => {
         // Response targeting #dialog => show the modal

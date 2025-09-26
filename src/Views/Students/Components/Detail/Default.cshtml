@@ -1,10 +1,10 @@
-﻿@model ContosoUniversity.Models.Department
+﻿@model ContosoUniversity.Models.Student
 
 <form class="modal-content"
       hx-trigger="submit"
-      hx-post="/departments/edit">
+      hx-post="/students/edit">
     <div class="modal-header">
-        <h5 class="modal-title">Department Details</h5>
+        <h5 class="modal-title">Student Details</h5>
     </div>
     <div class="modal-body">
         @Html.Partial("../Shared/DetailPartial.cshtml", Model)
@@ -14,7 +14,7 @@
             <button type="button"
                     class="btn btn-primary"
                     hx-trigger="click"
-                    hx-get="/departments/edit/@Model.DepartmentID"
+                    hx-get="/students/edit/@Model.ID"
                     hx-target="#dialog"
                     hx-swap="innerHTML">
                         Edit

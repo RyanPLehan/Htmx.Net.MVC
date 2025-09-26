@@ -18,22 +18,24 @@ namespace ContosoUniversity.ViewComponents.Students
             _context = context;
         }
 
-        public async Task<IViewComponentResult> InvokeAsync(string sortOrder,
-                                                            string currentFilter,
+        public async Task<IViewComponentResult> InvokeAsync(string columnName,
+                                                            string sortOrder,
+                                                            string filter,
                                                             string searchString,
                                                             int? pageNumber)
         {
+            ViewData["ColumnName"] = columnName;
+            ViewData["SortOrder"] = sortOrder;
+
             // Shell should be loaded only once
             if (String.IsNullOrWhiteSpace(sortOrder) &&
-                String.IsNullOrWhiteSpace(currentFilter) &&
+                String.IsNullOrWhiteSpace(filter) &&
                 String.IsNullOrWhiteSpace(searchString) &&
                 pageNumber.GetValueOrDefault() == 0)
-            { return View("Master"); }
+            {
+                return View("Master"); 
+            }
 
-
-            ViewData["CurrentSort"] = sortOrder;
-            ViewData["NameSortParm"] = String.IsNullOrEmpty(sortOrder) ? "name_desc" : "";
-            ViewData["DateSortParm"] = sortOrder == "Date" ? "date_desc" : "Date";
 
             if (!String.IsNullOrWhiteSpace(searchString))
             {
@@ -41,14 +43,14 @@ namespace ContosoUniversity.ViewComponents.Students
             }
             else
             {
-                searchString = currentFilter;
+                searchString = filter;
             }
 
-            ViewData["CurrentFilter"] = searchString;
+            ViewData["Filter"] = searchString;
 
             IQueryable<Student> query = _context.Students;
             query = ApplyFilter(query, searchString);
-            query = ApplySortOrder(query, sortOrder);
+            query = ApplySortOrder(query, columnName, sortOrder);
 
             int pageSize = 3;
             PaginatedList<Student> students = await PaginatedList<Student>.CreateAsync(query.AsNoTracking(), pageNumber ?? 1, pageSize);
@@ -72,18 +74,21 @@ namespace ContosoUniversity.ViewComponents.Students
             return query;
         }
 
-        private IQueryable<Student> ApplySortOrder(IQueryable<Student> query, string sortOrder)
+        private IQueryable<Student> ApplySortOrder(IQueryable<Student> query, string columnName, string sortOrder)
         {
-            switch (sortOrder)
+            bool sortAscending = (String.IsNullOrWhiteSpace(sortOrder) ||
+                                  sortOrder.Equals("asc", StringComparison.OrdinalIgnoreCase) 
+                                  ? true : false);
+
+            string column = (String.IsNullOrWhiteSpace(columnName) ? String.Empty : columnName.ToLower());
+
+            switch (column)
             {
-                case "name_desc":
-                    query = query.OrderByDescending(q => q.LastName);
+                case "lastname":
+                    query = (sortAscending ? query.OrderBy(q => q.LastName) : query.OrderByDescending(q => q.LastName));
                     break;
-                case "Date":
-                    query = query.OrderBy(q => q.EnrollmentDate);
-                    break;
-                case "date_desc":
-                    query = query.OrderByDescending(q => q.EnrollmentDate);
+                case "enrollmentdate":
+                    query = (sortAscending ? query.OrderBy(q => q.EnrollmentDate) : query.OrderByDescending(q => q.EnrollmentDate));
                     break;
                 default:
                     query = query.OrderBy(q => q.LastName);

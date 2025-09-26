@@ -1,0 +1,56 @@
+﻿@model ContosoUniversity.Models.Student
+
+@{
+    if (!ViewData.ContainsKey("IsReadonly"))
+    { ViewData["IsReadonly"] = true; }
+
+    bool isReadonly = true;
+    Boolean.TryParse(ViewData["IsReadonly"].ToString(), out isReadonly);
+    string readOnly = isReadonly ? "readonly" : String.Empty;
+
+    if (Model.EnrollmentDate == null || Model.EnrollmentDate == DateTime.MinValue)
+    { Model.EnrollmentDate = DateTime.Today; }
+}
+
+
+<dl class="row">
+    <dt class="col-sm-3">Last Name</dt>
+    <dd class="col-sm-10">
+        <input type="text" class="form-control" @readOnly 
+               name="Name" value="@Html.DisplayFor(model => model.LastName)" />
+    </dd>
+    <dt class="col-sm-3">First Name</dt>
+    <dd class="col-sm-10">
+        <input type="text" class="form-control" @readOnly 
+               name="Budget" value="@Html.DisplayFor(model => model.FirstName)" />
+    </dd>
+    <dt class="col-sm-3">Enrollment Date</dt>
+    <dd class="col-sm-10">
+        <input type="text" class="form-control" @readOnly 
+               name="StartDate" value="@Html.DisplayFor(model => model.EnrollmentDate)" />
+    </dd>
+    <dt class="col-sm-3"><br />Enrollments</dt>
+    <dd class="col-sm-10">
+        <div class="table-scroll-container">
+            <table class="table table-bordered">
+                <tr>
+                    <th>Course Title</th>
+                    <th>Grade</th>
+                </tr>
+                @foreach (var item in Model.Enrollments)
+                {
+                    <tr>
+                        <td>
+                            @Html.DisplayFor(modelItem => item.Course.Title)
+                        </td>
+                        <td>
+                            @Html.DisplayFor(modelItem => item.Grade)
+                        </td>
+                    </tr>
+                }
+            </table>
+        </div>
+    </dd>
+</dl>
+<input type="hidden" readonly name="DepartmentID" value="@Model.ID" />
+@Html.AntiForgeryToken()

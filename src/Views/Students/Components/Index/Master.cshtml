@@ -17,10 +17,11 @@
 <form hx-trigger="submit"
       hx-get=""
       hx-target="#detailList"
-      hx-swap="innerHTML">
+      hx-swap="innerHTML"
+      hx-on::after-request='setFilter(document.getElementById("search-name"));'>
     <div class="form-actions no-color">
         <p>
-            <label>Find by name: <input type="text" name="SearchString" value="@ViewData["CurrentFilter"]" /></label>
+            <label>Find by name: <input type="text" id="search-name" name="SearchString" /></label>
             <input type="submit" value="Search" class="btn btn-primary" />
             |
             <a href="/students?pageNumber=1"
@@ -28,23 +29,27 @@
                hx-get="/students?pageNumber=1"
                hx-target="#detailList"
                hx-swap="innerHTML"
-               hx-push-url="/students">
+               hx-push-url="/students"
+               hx-on::after-request='clearFilter(document.getElementById("search-name"));'>
                 Back to Full List
             </a>
         </p>
     </div>
 </form>
 
-
 <table class="table">
     <thead>
         <tr>
             <th>
-                <a href="?sortOrder=@ViewData["NameSortParm"]&currentFilter=@ViewData["CurrentFilter"]"
+                <a name="sortColumn"
+                   data-columnName="LastName"
+                   data-sortOrder="desc"
+                   href="?columnName=LastName&sortOrder=desc&filter="
                    hx-trigger="click"
-                   hx-get="?sortOrder=@ViewData["NameSortParm"]&currentFilter=@ViewData["CurrentFilter"]"
+                   hx-get="?columnName=LastName&sortOrder=desc&filter="
                    hx-target="#detailList"
-                   hx-swap="innerHTML">
+                   hx-swap="innerHTML"
+                   hx-on::after-request="flipColumnSortOrder(this);">
                     Last Name
                 </a>
             </th>
@@ -52,11 +57,15 @@
                 First Name
             </th>
             <th>
-                <a href="?sortOrder=@ViewData["DateSortParm"]&currentFilter=@ViewData["CurrentFilter"]"
+                <a name="sortColumn"
+                   data-columnName="EnrollmentDate"
+                   data-sortOrder="asc"
+                   href="?columnName=EnrollmentDate&sortOrder=asc&filter="
                    hx-trigger="click"
-                   hx-get="?sortOrder=@ViewData["DateSortParm"]&currentFilter=@ViewData["CurrentFilter"]"
+                   hx-get="?columnName=EnrollmentDate&sortOrder=asc&filter="
                    hx-target="#detailList"
-                   hx-swap="innerHTML">
+                   hx-swap="innerHTML"
+                   hx-on::after-request="flipColumnSortOrder(this);">
                     Enrollment Date
                 </a>
             </th>
@@ -83,4 +92,5 @@
     </div>
 </div>
 
+<script src="~/js/table.js" asp-append-version="true" defer></script>
 <script src="~/js/dialog.js" asp-append-version="true" defer></script>

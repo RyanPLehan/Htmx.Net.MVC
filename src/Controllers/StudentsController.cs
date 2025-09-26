@@ -8,6 +8,7 @@ using Microsoft.EntityFrameworkCore;
 using ContosoUniversity.Data;
 using ContosoUniversity.Models;
 using ContosoUniversity.ViewComponents.Students;
+using Microsoft.EntityFrameworkCore.Metadata.Internal;
 
 namespace ContosoUniversity.Controllers
 {
@@ -22,14 +23,16 @@ namespace ContosoUniversity.Controllers
 
         // GET: Students
         public async Task<IActionResult> Index(
-            string sortOrder,
-            string currentFilter,
-            string searchString,
-            int? pageNumber)
+            [FromQuery] string columnName,
+            [FromQuery] string sortOrder,
+            [FromQuery] string filter,
+            [FromQuery] string searchString,
+            [FromQuery] int? pageNumber)
         {
             var parameters = new {
+                columnName = columnName,
                 sortOrder = sortOrder,
-                currentFilter = currentFilter,
+                filter = filter,
                 searchString = searchString,
                 pageNumber = pageNumber,
             };
@@ -40,23 +43,22 @@ namespace ContosoUniversity.Controllers
         // GET: Students/Details/5
         public async Task<IActionResult> Details(int? id)
         {
-            if (id == null)
-            {
-                return NotFound();
-            }
-
             var student = await _context.Students
-                 .Include(s => s.Enrollments)
-                     .ThenInclude(e => e.Course)
-                 .AsNoTracking()
-                 .FirstOrDefaultAsync(m => m.ID == id);
+                                        .AsNoTracking()
+                                        .Where(x => x.ID == id.GetValueOrDefault())
+                                        .Include(x => x.Enrollments)
+                                            .ThenInclude(e => e.Course)
+                                        .FirstOrDefaultAsync();
 
             if (student == null)
             {
+                this.HttpContext.Response.Headers.Append("HX-Location", "/Departments?loadDetails=true");
+                this.HttpContext.Response.Headers.Append("HX-Retarget", "#shell-content");
+                this.HttpContext.Response.Headers.Append("HX-Reswap", "innerHTML");
                 return NotFound();
             }
 
-            return View(student);
+            return ViewComponent(typeof(DetailViewComponent), student);
         }
 
         // GET: Students/Create
