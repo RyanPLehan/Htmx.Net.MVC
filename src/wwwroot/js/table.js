@@ -9,9 +9,9 @@ function clearFilter(filterElement) {
     filterElement.value = null;
     filterElement.setAttribute('data-filter', "");
 
-    var sortColumns = document.getElementsByName("sortColumn");
+    const sortColumns = document.getElementsByName("sortColumn");
     sortColumns.forEach((sortColumnElement, index) => {
-        var queryParams = createColumnSortParameters(sortColumnElement, filterElement);
+        const queryParams = createColumnSortParameters(sortColumnElement, filterElement);
         setAnchorUrl(sortColumnElement, queryParams);
     });
 
@@ -22,23 +22,37 @@ function setFilter(filterElement) {
     if (!filterElement)
         return false;
 
-    var value = filterElement.value;
+    const value = filterElement.value;
     if (value == undefined || value == null)
         filterElement.setAttribute('data-filter', "");
     else
         filterElement.setAttribute('data-filter', value);
 
-    var sortColumns = document.getElementsByName("sortColumn");
+    const sortColumns = document.getElementsByName("sortColumn");
     sortColumns.forEach((sortColumnElement, index) => {
-        var queryParams = createColumnSortParameters(sortColumnElement, filterElement);
+        const queryParams = createColumnSortParameters(sortColumnElement, filterElement);
         setAnchorUrl(sortColumnElement, queryParams);
     });
 
     return false;
 }
 
+// Checks to see if user cleared out search critera and if so, append query parameter
+function checkFilterCriteria(filterElement, parameterValue) {
+    var ret = null;
 
-function flipColumnSortOrder(columnElement) {
+    if (!filterElement)
+        return ret;
+
+    const value = filterElement.value;
+    if (value == undefined || value == null || value == "")
+        ret = parameterValue;
+
+    return ret;
+}
+
+
+function flipColumnSortOrder(columnElement, filterElement) {
     if (!columnElement)
         return false;
 
@@ -49,7 +63,7 @@ function flipColumnSortOrder(columnElement) {
         else
             columnElement.setAttribute('data-sortOrder', "asc");
 
-        var queryParams = createColumnSortParameters(columnElement, document.getElementById("search-name"));
+        const queryParams = createColumnSortParameters(columnElement, filterElement);
         setAnchorUrl(columnElement, queryParams);
     }
 
@@ -61,8 +75,8 @@ function createColumnSortParameters(columnElement, filterElement) {
     if (!columnElement)
         return '';
 
-    var columnName = columnElement.getAttribute('data-columnName');
-    var sortOrder = columnElement.getAttribute('data-sortOrder');
+    const columnName = columnElement.getAttribute('data-columnName');
+    const sortOrder = columnElement.getAttribute('data-sortOrder');
 
     var filter = "";
     if (filterElement) {
@@ -81,11 +95,11 @@ function setAnchorUrl(element, url) {
     if (!element)
         return;
 
-    var href = element.getAttribute('href');
+    const href = element.getAttribute('href');
     if (href != undefined && href != null)
         element.setAttribute('href', url);
 
-    var hxget = element.getAttribute('hx-get');
+    const hxget = element.getAttribute('hx-get');
     if (hxget != undefined && hxget != null)
         element.setAttribute('hx-get', url);
 
