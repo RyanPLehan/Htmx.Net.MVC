@@ -1,0 +1,44 @@
+﻿@model IEnumerable<ContosoUniversity.Models.Course>
+
+@foreach (var item in Model) 
+{
+    <tr>
+        <td>
+            @Html.DisplayFor(modelItem => item.CourseID)
+        </td>
+        <td>
+            @Html.DisplayFor(modelItem => item.Title)
+        </td>
+        <td>
+            @Html.DisplayFor(modelItem => item.Credits)
+        </td>
+        <td>
+            @Html.DisplayFor(modelItem => item.Department.Name)
+        </td>
+        <td>
+            <a href="/courses/edit/@item.CourseID"
+               hx-trigger="click"
+               hx-get="/courses/edit/@item.CourseID"
+               hx-target="#dialog"
+               hx-swap="innerHTML">
+                Edit
+            </a>
+            |
+            <a href="/courses/details/@item.CourseID"
+               hx-trigger="click"
+               hx-get="/courses/details/@item.CourseID"
+               hx-target="#dialog"
+               hx-swap="innerHTML">
+                Details
+            </a>
+            |
+            <a href="/courses/delete/@item.CourseID"
+               hx-trigger="click"
+               hx-get="/courses/delete/@item.CourseID"
+               hx-target="#dialog"
+               hx-swap="innerHTML">
+                 Delete
+            </a>
+        </td>
+    </tr>
+}

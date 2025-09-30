@@ -52,7 +52,7 @@ namespace ContosoUniversity.Controllers
 
             if (student == null)
             {
-                this.HttpContext.Response.Headers.Append("HX-Location", "/Departments?loadDetails=true");
+                this.HttpContext.Response.Headers.Append("HX-Location", "/Students?pageNumber=1");
                 this.HttpContext.Response.Headers.Append("HX-Retarget", "#shell-content");
                 this.HttpContext.Response.Headers.Append("HX-Reswap", "innerHTML");
                 return NotFound();
@@ -172,7 +172,7 @@ namespace ContosoUniversity.Controllers
 
             if (student == null)
             {
-                this.HttpContext.Response.Headers.Append("HX-Location", "/Departments?loadDetails=true");
+                this.HttpContext.Response.Headers.Append("HX-Location", "/Students?pageNumber=1");
                 this.HttpContext.Response.Headers.Append("HX-Retarget", "#shell-content");
                 this.HttpContext.Response.Headers.Append("HX-Reswap", "innerHTML");
                 return NotFound();

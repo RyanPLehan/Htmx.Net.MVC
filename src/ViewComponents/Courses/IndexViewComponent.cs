@@ -18,13 +18,19 @@ namespace ContosoUniversity.ViewComponents.Courses
             _context = context;
         }
 
-        public async Task<IViewComponentResult> InvokeAsync()
+        public async Task<IViewComponentResult> InvokeAsync(bool? loadDetails)
         {
+            // Shell should be loaded only once
+            if (!loadDetails.GetValueOrDefault())
+                return View("Master");
+
+
             var courses = await _context.Courses
                                         .AsNoTracking()
                                         .Include(c => c.Department)
                                         .ToArrayAsync();
-            return View(courses);
+            return View("Details", courses);
         }
+
     }
 }

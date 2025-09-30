@@ -21,29 +21,29 @@ namespace ContosoUniversity.Controllers
         }
 
         // GET: Courses
-        public async Task<IActionResult> Index()
+        public async Task<IActionResult> Index(bool? loadDetails)
         {
-            return ViewComponent(typeof(IndexViewComponent));
+            var parameters = new { loadDetails = loadDetails };
+            return ViewComponent(typeof(IndexViewComponent), parameters);
         }
 
         // GET: Courses/Details/5
         public async Task<IActionResult> Details(int? id)
         {
-            if (id == null)
-            {
-                return NotFound();
-            }
-
             var course = await _context.Courses
-                .Include(c => c.Department)
-                .AsNoTracking()
-                .FirstOrDefaultAsync(m => m.CourseID == id);
+                                       .AsNoTracking()
+                                       .Include(x => x.Department)
+                                       .FirstOrDefaultAsync(x => x.CourseID == id.GetValueOrDefault());
+
             if (course == null)
             {
+                this.HttpContext.Response.Headers.Append("HX-Location", "/Courses?loadDetails=true");
+                this.HttpContext.Response.Headers.Append("HX-Retarget", "#shell-content");
+                this.HttpContext.Response.Headers.Append("HX-Reswap", "innerHTML");
                 return NotFound();
             }
 
-            return View(course);
+            return ViewComponent(typeof(DetailViewComponent), course);
         }
 
         // GET: Courses/Create
