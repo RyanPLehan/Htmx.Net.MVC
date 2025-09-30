@@ -80,3 +80,7 @@ The following updates were performed:
 Ideas of using Modals/Dialogs with HTMX came from [Modal forms with Django+HTMX](https://blog.benoitblanchon.fr/django-htmx-modal-form/)
 
 One of the main issues, with the original MS Contoso University application, is that for every Route CRUD operation, there is a corresponding view.  These views usually only differ by layout and buttons.  Therefore, for each Route, there is a single partial view to display entity details, thus leaving a CRUD operation specific view as the parent.
+
+Many of the "Index" views were split into a Master/Detail page.  The Master page contains, mainly, static information, while the Detail page contains data that has a high probability of changing.
+
+This branch contains both client and server operations.  Meaning, server operations are requesting via HTMX and client side operations, ie closing diaglog boxes, are handled by vanilla Javascript.
