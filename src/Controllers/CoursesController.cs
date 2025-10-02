@@ -73,20 +73,20 @@ namespace ContosoUniversity.Controllers
         // GET: Courses/Edit/5
         public async Task<IActionResult> Edit(int? id)
         {
-            if (id == null)
-            {
-                return NotFound();
-            }
-
             var course = await _context.Courses
-                .AsNoTracking()
-                .FirstOrDefaultAsync(m => m.CourseID == id);
+                                       .AsNoTracking()
+                                       .Include(i => i.Department)
+                                       .Where(x => x.CourseID == id.GetValueOrDefault())
+                                       .FirstOrDefaultAsync();
+
             if (course == null)
             {
                 return NotFound();
             }
-            PopulateDepartmentsDropDownList(course.DepartmentID);
-            return View(course);
+
+            var deparments = await _context.Departments.ToArrayAsync();
+            ViewData["Departments"] = new SelectList(deparments, "DepartmentID", "Name", course.DepartmentID);
+            return ViewComponent(typeof(EditViewComponent), course);
         }
 
         // POST: Courses/Edit/5
@@ -97,35 +97,47 @@ namespace ContosoUniversity.Controllers
         // https://andrewlock.net/preventing-mass-assignment-or-over-posting-in-asp-net-core/
         [HttpPost, ActionName("Edit")]
         [ValidateAntiForgeryToken]
-        public async Task<IActionResult> EditPost(int? id)
+        public async Task<IActionResult> EditPost(Course course)
         {
-            if (id == null)
-            {
-                return NotFound();
-            }
+            if (course == null)
+                return Ok();
 
             var courseToUpdate = await _context.Courses
-                .FirstOrDefaultAsync(c => c.CourseID == id);
+                                               .Where(x => x.CourseID == course.CourseID)
+                                               .FirstOrDefaultAsync();
 
-            if (await TryUpdateModelAsync<Course>(courseToUpdate,
+            if (courseToUpdate == null)
+            {
+                string errorMsg = "Unable to save changes. The course was deleted by another user.";
+
+                this.HttpContext.Response.Headers.Append("HX-Retarget", "#error-message");
+                this.HttpContext.Response.Headers.Append("HX-Reswap", "innerHTML");
+                return Ok(errorMsg);
+            }
+
+            if (await TryUpdateModelAsync<Course>(
+                courseToUpdate,
                 "",
-                c => c.Credits, c => c.DepartmentID, c => c.Title))
+                s => s.Title, s => s.Credits, s => s.DepartmentID))
             {
                 try
                 {
                     await _context.SaveChangesAsync();
-                    return RedirectToAction(nameof(Index));
+                    this.HttpContext.Response.Headers.Append("HX-Trigger", "listChanged");
+                    return Ok();
                 }
-                catch (DbUpdateException /* ex */)
+                catch (DbUpdateException ex)
                 {
-                    //Log the error (uncomment ex variable name and write a log.)
-                    ModelState.AddModelError("", "Unable to save changes. " +
+                    string errorMsg = "Unable to save changes. " +
                         "Try again, and if the problem persists, " +
-                        "see your system administrator.");
+                        "see your system administrator.";
+
+                    this.HttpContext.Response.Headers.Append("HX-Retarget", "#error-message");
+                    this.HttpContext.Response.Headers.Append("HX-Reswap", "innerHTML");
+                    return Ok(errorMsg);
                 }
             }
-            PopulateDepartmentsDropDownList(courseToUpdate.DepartmentID);
-            return View(courseToUpdate);
+            return Ok();
         }
 
         private void PopulateDepartmentsDropDownList(object selectedDepartment = null)
