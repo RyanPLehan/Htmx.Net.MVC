@@ -39,7 +39,7 @@ namespace ContosoUniversity.Controllers
             if (department == null)
             {
                 this.HttpContext.Response.Headers.Append("HX-Location", "/Departments?loadDetails=true");
-                this.HttpContext.Response.Headers.Append("HX-Retarget", "#shell-content");
+                this.HttpContext.Response.Headers.Append("HX-Retarget", "#detailList");
                 this.HttpContext.Response.Headers.Append("HX-Reswap", "innerHTML");
                 return NotFound();
             }
@@ -160,7 +160,7 @@ namespace ContosoUniversity.Controllers
             if (department == null)
             {
                 this.HttpContext.Response.Headers.Append("HX-Location", "/Departments?loadDetails=true");
-                this.HttpContext.Response.Headers.Append("HX-Retarget", "#shell-content");
+                this.HttpContext.Response.Headers.Append("HX-Retarget", "#detailList");
                 this.HttpContext.Response.Headers.Append("HX-Reswap", "innerHTML");
                 return NotFound();
             }

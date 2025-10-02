@@ -38,7 +38,7 @@ namespace ContosoUniversity.Controllers
             if (course == null)
             {
                 this.HttpContext.Response.Headers.Append("HX-Location", "/Courses?loadDetails=true");
-                this.HttpContext.Response.Headers.Append("HX-Retarget", "#shell-content");
+                this.HttpContext.Response.Headers.Append("HX-Retarget", "#detailList");
                 this.HttpContext.Response.Headers.Append("HX-Reswap", "innerHTML");
                 return NotFound();
             }
@@ -139,32 +139,53 @@ namespace ContosoUniversity.Controllers
         // GET: Courses/Delete/5
         public async Task<IActionResult> Delete(int? id)
         {
-            if (id == null)
-            {
-                return NotFound();
-            }
-
             var course = await _context.Courses
-                .Include(c => c.Department)
-                .AsNoTracking()
-                .FirstOrDefaultAsync(m => m.CourseID == id);
+                                        .Include(c => c.Department)
+                                        .AsNoTracking()
+                                        .FirstOrDefaultAsync(m => m.CourseID == id.GetValueOrDefault());
+
+
             if (course == null)
             {
+                this.HttpContext.Response.Headers.Append("HX-Location", "/Students?pageNumber=1");
+                this.HttpContext.Response.Headers.Append("HX-Retarget", "#detailList");
+                this.HttpContext.Response.Headers.Append("HX-Reswap", "innerHTML");
                 return NotFound();
             }
 
-            return View(course);
+            return ViewComponent(typeof(DeleteViewComponent), course);
         }
 
         // POST: Courses/Delete/5
         [HttpPost, ActionName("Delete")]
         [ValidateAntiForgeryToken]
-        public async Task<IActionResult> DeleteConfirmed(int id)
+        public async Task<IActionResult> DeleteConfirmed(Course course)
         {
-            var course = await _context.Courses.FindAsync(id);
-            _context.Courses.Remove(course);
-            await _context.SaveChangesAsync();
-            return RedirectToAction(nameof(Index));
+            try
+            {
+                var courseToDelete = await _context.Courses
+                                                   .Where(x => x.CourseID == course.CourseID)
+                                                   .FirstOrDefaultAsync();
+
+                if (courseToDelete != null)
+                {
+                    _context.Courses.Remove(courseToDelete);
+                    await _context.SaveChangesAsync();
+                }
+
+                this.HttpContext.Response.Headers.Append("HX-Trigger", "listChanged");
+                return Ok();
+            }
+
+            catch (DbUpdateException /* ex */)
+            {
+                string errorMsg = "Delete failed. Try again, and if the problem persists " +
+                    "see your system administrator.";
+
+                this.HttpContext.Response.Headers.Append("HX-Retarget", "#error-message");
+                this.HttpContext.Response.Headers.Append("HX-Reswap", "innerHTML");
+                return Ok(errorMsg);
+            }
         }
 
         public IActionResult UpdateCourseCredits()

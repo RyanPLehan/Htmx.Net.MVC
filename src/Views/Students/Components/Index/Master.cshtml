@@ -18,8 +18,8 @@
       hx-get=""
       hx-target="#detailList"
       hx-swap="innerHTML"
-      hx-vals='js:{pageNumber: checkFilterCriteria(document.getElementById("search-criteria"), "1")}'
-      hx-on::after-request='setFilter(document.getElementById("search-criteria"));'>
+      hx-vals='js:{pageNumber: HtmxTable.checkFilterCriteria(document.getElementById("search-criteria"), "1")}'
+      hx-on::after-request='HtmxTable.setFilter(document.getElementById("search-criteria"));'>
     <div class="form-actions no-color">
         <p>
             <label>Find by name: <input type="text" id="search-criteria" name="SearchString" /></label>
@@ -31,14 +31,16 @@
                hx-target="#detailList"
                hx-swap="innerHTML"
                hx-push-url="/students"
-               hx-on::after-request='clearFilter(document.getElementById("search-criteria"));'>
+               hx-on::after-request='HtmxTable.clearFilter(document.getElementById("search-criteria"));'>
                 Back to Full List
             </a>
         </p>
     </div>
 </form>
 
-<table class="table">
+<table class="table"
+       id="StudentTable"
+       hx-on::load='if (!this.htmxDialogInitialized) { this.htmxDialogInitialized = HtmxDialog.initialize("modal", "dialog"); }'>
     <thead>
         <tr>
             <th>
@@ -50,7 +52,7 @@
                    hx-get="?columnName=LastName&sortOrder=desc&filter="
                    hx-target="#detailList"
                    hx-swap="innerHTML"
-                   hx-on::after-request='flipColumnSortOrder(this, document.getElementById("search-criteria"));'>
+                   hx-on::after-request='HtmxTable.flipColumnSortOrder(this, document.getElementById("search-criteria"));'>
                     Last Name
                 </a>
             </th>
@@ -66,7 +68,7 @@
                    hx-get="?columnName=EnrollmentDate&sortOrder=asc&filter="
                    hx-target="#detailList"
                    hx-swap="innerHTML"
-                   hx-on::after-request='flipColumnSortOrder(this, document.getElementById("search-criteria"));'>
+                   hx-on::after-request='HtmxTable.flipColumnSortOrder(this, document.getElementById("search-criteria"));'>
                     Enrollment Date
                 </a>
             </th>
@@ -88,10 +90,11 @@
 
 <div id="modal" class="modal fade">
     <div id="dialog" 
-            class="modal-dialog modal-lg modal-dialog-centered"
-            hx-target="this">
+         class="modal-dialog modal-lg modal-dialog-centered"
+         hx-target="this"
+         hx-on::after-swap="HtmxDialog.showModal(event);"
+         hx-on::before-swap="HtmxDialog.hideModal(event);">
     </div>
 </div>
 
-<script src="~/js/table.js" asp-append-version="true" defer></script>
-<script src="~/js/dialog.js" asp-append-version="true" defer></script>
+

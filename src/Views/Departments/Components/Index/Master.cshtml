@@ -13,7 +13,8 @@
         Create New
     </a>
 </p>
-<table class="table">
+<table class="table"
+       hx-on::load='if (!this.htmxDialogInitialized) { this.htmxDialogInitialized = HtmxDialog.initialize("modal", "dialog"); }'>
     <thead>
         <tr>
             <th>Name</th>
@@ -36,11 +37,13 @@
         </tr>
     </tbody>
 </table>
-<div id="modal" class="modal fade">
+<div id="modal" class="modal fade"
+     hx-on:hidden.bs.modal="HtmxDialog.clearDialog(event);">
     <div id="dialog" 
-            class="modal-dialog modal-lg modal-dialog-centered"
-            hx-target="this">
+         class="modal-dialog modal-lg modal-dialog-centered"
+         hx-target="this"
+         hx-on::after-swap="HtmxDialog.showModal(event);"
+         hx-on::before-swap="HtmxDialog.hideModal(event);">
     </div>
 </div>
 
-<script src="~/js/dialog.js" asp-append-version="true" defer></script>
