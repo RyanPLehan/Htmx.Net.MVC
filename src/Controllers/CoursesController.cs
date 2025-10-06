@@ -47,10 +47,11 @@ namespace ContosoUniversity.Controllers
         }
 
         // GET: Courses/Create
-        public IActionResult Create()
+        public async Task<IActionResult> Create()
         {
-            PopulateDepartmentsDropDownList();
-            return View();
+            var deparments = await _context.Departments.ToArrayAsync();
+            ViewData["Departments"] = new SelectList(deparments, "DepartmentID", "Name");
+            return ViewComponent(typeof(CreateViewComponent), new Course());
         }
 
         // POST: Courses/Create
@@ -58,16 +59,24 @@ namespace ContosoUniversity.Controllers
         // more details see http://go.microsoft.com/fwlink/?LinkId=317598.
         [HttpPost]
         [ValidateAntiForgeryToken]
-        public async Task<IActionResult> Create([Bind("CourseID,Credits,DepartmentID,Title")] Course course)
+        public async Task<IActionResult> Create(Course course)
         {
             if (ModelState.IsValid)
             {
                 _context.Add(course);
                 await _context.SaveChangesAsync();
-                return RedirectToAction(nameof(Index));
+
+                this.HttpContext.Response.Headers.Append("HX-Trigger", "listChanged");
+                return Ok();
             }
-            PopulateDepartmentsDropDownList(course.DepartmentID);
-            return View(course);
+            else
+            {
+                string errorMsg = "The course you attempted to create is invalid.  Please make the appropriate corrections.";
+
+                this.HttpContext.Response.Headers.Append("HX-Retarget", "#error-message");
+                this.HttpContext.Response.Headers.Append("HX-Reswap", "innerHTML");
+                return Ok(errorMsg);
+            }
         }
 
         // GET: Courses/Edit/5

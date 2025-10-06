@@ -3,7 +3,7 @@
     static #dialogElement;
 
     static initialize(modalElementId, dialogElementId) {
-        console.log("Initializer invoked");
+        //console.log("Initializer invoked");
         if (!modalElementId || !document.getElementById(modalElementId))
             throw new Error("Modal Element Id must be a valid id");
 
