@@ -18,7 +18,7 @@ namespace ContosoUniversity.ViewComponents.Instructors
             _context = context;
         }
 
-        public async Task<IViewComponentResult> InvokeAsync(int? id, int? courseID)
+        public async Task<IViewComponentResult> InvokeAsync(bool? loadDetails, int? id, int? courseID)
         {
             // Get Courses by InstructorID
             if (id != null)
@@ -59,7 +59,12 @@ namespace ContosoUniversity.ViewComponents.Instructors
             // Get the entire list all the instructors
             else
             {
-                return View(await GetInstructors());
+                // Shell should be loaded only once
+                if (!loadDetails.GetValueOrDefault())
+                    return View("Master");
+
+
+                return View("Details", await GetInstructors());
             }
         }
 

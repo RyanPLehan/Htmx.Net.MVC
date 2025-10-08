@@ -1,0 +1,55 @@
+﻿@model IEnumerable<ContosoUniversity.Models.Instructor>
+
+@foreach (var item in Model) 
+{
+    <div class="row border-1">
+        <div class="col-sm">
+            <details hx-trigger="toggle"
+                     hx-get="?id=@item.ID"
+                     hx-target="#instructor-courses-@item.ID"
+                     hx-swap="innerHTML">
+                <summary>
+                    @Html.DisplayFor(modelItem => item.LastName)
+                </summary>
+            </details>
+        </div>
+        <div class="col-sm">
+            @Html.DisplayFor(modelItem => item.FirstName)
+        </div>
+        <div class="col-sm">
+            @Html.DisplayFor(modelItem => item.HireDate)
+        </div>
+        <div class="col-sm">
+            @if (item.OfficeAssignment != null)
+            {
+                @item.OfficeAssignment.Location
+            }
+        </div>
+        <div class="col-sm">
+            <a href="/instructors/edit/@item.ID"
+               hx-trigger="click"
+               hx-get="/instructors/edit/@item.ID"
+               hx-target="#dialog"
+               hx-swap="innerHTML">
+                Edit
+            </a>
+            |
+            <a href="/instructors/details/@item.ID"
+               hx-trigger="click"
+               hx-get="/instructors/details/@item.ID"
+               hx-target="#dialog"
+               hx-swap="innerHTML">
+                Details
+            </a>
+            |
+            <a href="/instructors/delete/@item.ID"
+               hx-trigger="click"
+               hx-get="/instructors/delete/@item.ID"
+               hx-target="#dialog"
+               hx-swap="innerHTML">
+                Delete
+            </a>
+        </div>
+    </div>
+    <div class="mt-1 me-1 ms-2 border border-black ps-3" id="instructor-courses-@item.ID"></div>
+}

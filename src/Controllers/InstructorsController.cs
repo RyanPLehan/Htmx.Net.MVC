@@ -22,10 +22,11 @@ namespace ContosoUniversity.Controllers
         }
 
         // GET: Instructors
-        public async Task<IActionResult> Index(int? id, int? courseID)
+        public async Task<IActionResult> Index(bool? loadDetails, int? id, int? courseID)
         {
             var parameters = new
             {
+                loadDetails = loadDetails,
                 id = id,
                 courseID = courseID,
             };

@@ -2,44 +2,26 @@
 
 @if (Model.Any())
 {
-    <h3>Courses Taught by: @ViewData["InstructorName"]</h3>
-    <table class="table">
-        <tr>
-            <th></th>
-            <th>Number</th>
-            <th>Title</th>
-            <th>Department</th>
-        </tr>
-
-        @foreach (var item in Model)
-        {
-            string selectedRow = "";
-            if (item.CourseID == (int?)ViewData["CourseID"])
-            {
-                selectedRow = "success";
-            }
-            <tr class="@selectedRow">
-                <td>
-                    <a href="?courseID=@item.CourseID"
-                       hx-trigger="click"
-                       hx-get="?courseID=@item.CourseID"
-                       hx-target="#instructor-enrollments"
-                       hx-swap="innerHTML">
-                        Select
-                    </a>
-                </td>
-                <td>
-                    @item.CourseID
-                </td>
-                <td>
-                    @item.Title
-                </td>
-                <td>
-                    @item.Department.Name
-                </td>
-            </tr>
-        }
-
-    </table>
-    <div id="instructor-enrollments"></div>
+    <div class="fw-semibold text-decoration-underline">Courses</div>
+    <div class="row">
+        <div class="col-1 fw-semibold">Number</div>
+        <div class="col-2 fw-semibold">Title</div>
+        <div class="col-3 fw-semibold">Department</div>
+    </div>
+    @foreach(var item in Model)
+    {
+        <div class="row">
+            <div class="col-1">
+                <details hx-trigger="toggle"
+                         hx-get="?courseID=@item.CourseID"
+                         hx-target="#courses-enrollments-@item.CourseID"
+                         hx-swap="innerHTML">
+                    <summary>@item.CourseID</summary>
+                </details>
+            </div>
+            <div class="col-2">@item.Title</div>
+            <div class="col-3">@item.Department.Name</div>
+        </div>
+        <div class="mt-1 ms-3" id="courses-enrollments-@item.CourseID"></div>
+    }
 }
