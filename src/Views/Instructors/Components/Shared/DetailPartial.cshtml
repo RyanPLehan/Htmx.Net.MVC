@@ -1,0 +1,44 @@
+﻿@model ContosoUniversity.Models.Instructor
+
+@{
+    if (!ViewData.ContainsKey("IsReadonly"))
+    { ViewData["IsReadonly"] = true; }
+
+    bool isReadonly = true;
+    Boolean.TryParse(ViewData["IsReadonly"].ToString(), out isReadonly);
+
+    string readOnly = isReadonly ? "readonly" : String.Empty;
+
+
+    IEnumerable<SelectListItem> listItems = Enumerable.Empty<SelectListItem>();
+    if (ViewData.ContainsKey("Courses"))
+    {
+        listItems = (IEnumerable<SelectListItem>)ViewData["Courses"];
+    }
+}
+
+
+<dl class="row">
+    <dt class="col-sm-2">Last Name</dt>
+    <dd class="col-sm-10">
+        <input type="text" class="form-control" @readOnly 
+               name="LastName" value="@Html.DisplayFor(model => model.LastName)" />
+    </dd>
+    <dt class="col-sm-2">First Name</dt>
+    <dd class="col-sm-10">
+        <input type="text" class="form-control" @readOnly 
+               name="FirstName" value="@Html.DisplayFor(model => model.FirstName)" />
+    </dd>
+    <dt class="col-sm-2">Hire Date</dt>
+    <dd class="col-sm-10">
+        <input type="text" class="form-control" @readOnly 
+               name="HireDate" value="@Html.DisplayFor(model => model.HireDate)" />
+    </dd>
+    <dt class="col-sm-2">Office</dt>
+    <dd class="col-sm-10">
+        <input type="text" class="form-control" readonly
+               name="Location" value="@Html.DisplayFor(model => model.OfficeAssignment.Location)" />
+    </dd>
+</dl>
+<input type="hidden" readonly name="ID" value="@Model.ID" />
+@Html.AntiForgeryToken()

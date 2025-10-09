@@ -37,19 +37,21 @@ namespace ContosoUniversity.Controllers
         // GET: Instructors/Details/5
         public async Task<IActionResult> Details(int? id)
         {
-            if (id == null)
-            {
-                return NotFound();
-            }
-
             var instructor = await _context.Instructors
-                .FirstOrDefaultAsync(m => m.ID == id);
+                                           .AsNoTracking()
+                                           .Include(x => x.OfficeAssignment)
+                                           .Where(x => x.ID == id.GetValueOrDefault())
+                                           .FirstOrDefaultAsync();
+
             if (instructor == null)
             {
+                this.HttpContext.Response.Headers.Append("HX-Location", "/Instructors?loadDetails=true");
+                this.HttpContext.Response.Headers.Append("HX-Retarget", "#detailList");
+                this.HttpContext.Response.Headers.Append("HX-Reswap", "innerHTML");
                 return NotFound();
             }
 
-            return View(instructor);
+            return ViewComponent(typeof(DetailViewComponent), instructor);
         }
 
         // GET: Instructors/Create
@@ -205,44 +207,57 @@ namespace ContosoUniversity.Controllers
         // GET: Instructors/Delete/5
         public async Task<IActionResult> Delete(int? id)
         {
-            if (id == null)
-            {
-                return NotFound();
-            }
-
             var instructor = await _context.Instructors
-                .FirstOrDefaultAsync(m => m.ID == id);
+                                           .AsNoTracking()
+                                           .Include(x => x.OfficeAssignment)
+                                           .Where(x => x.ID == id.GetValueOrDefault())
+                                           .FirstOrDefaultAsync();
+
             if (instructor == null)
             {
+                this.HttpContext.Response.Headers.Append("HX-Location", "/Instructors?loadDetails=true");
+                this.HttpContext.Response.Headers.Append("HX-Retarget", "#detailList");
+                this.HttpContext.Response.Headers.Append("HX-Reswap", "innerHTML");
                 return NotFound();
             }
 
-            return View(instructor);
+            return ViewComponent(typeof(DeleteViewComponent), instructor);
         }
 
         // POST: Instructors/Delete/5
         [HttpPost, ActionName("Delete")]
         [ValidateAntiForgeryToken]
-        public async Task<IActionResult> DeleteConfirmed(int id)
+        public async Task<IActionResult> DeleteConfirmed(Instructor instructor)
         {
-            Instructor instructor = await _context.Instructors
-                .Include(i => i.CourseAssignments)
-                .SingleAsync(i => i.ID == id);
+            try
+            {
+                Instructor instructorToDelete = await _context.Instructors
+                                                              .Where(x => x.ID == instructor.ID)
+                                                              .FirstOrDefaultAsync();
 
-            var departments = await _context.Departments
-                .Where(d => d.InstructorID == id)
-                .ToListAsync();
-            departments.ForEach(d => d.InstructorID = null);
+                if (instructorToDelete != null)
+                {
+                    var departments = await _context.Departments
+                                                    .Where(d => d.InstructorID == instructor.ID)
+                                                    .ToListAsync();
+                    departments.ForEach(d => d.InstructorID = null);
 
-            _context.Instructors.Remove(instructor);
+                    _context.Instructors.Remove(instructorToDelete);
+                    await _context.SaveChangesAsync();
+                }
 
-            await _context.SaveChangesAsync();
-            return RedirectToAction(nameof(Index));
-        }
+                this.HttpContext.Response.Headers.Append("HX-Trigger", "listChanged");
+                return Ok();
+            }
+            catch (DbUpdateException /* ex */)
+            {
+                string errorMsg = "Delete failed. Try again, and if the problem persists " +
+                    "see your system administrator.";
 
-        private bool InstructorExists(int id)
-        {
-            return _context.Instructors.Any(e => e.ID == id);
+                this.HttpContext.Response.Headers.Append("HX-Retarget", "#error-message");
+                this.HttpContext.Response.Headers.Append("HX-Reswap", "innerHTML");
+                return Ok(errorMsg);
+            }
         }
     }
 }

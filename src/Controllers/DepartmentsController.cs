@@ -34,7 +34,8 @@ namespace ContosoUniversity.Controllers
             var department = await _context.Departments
                                            .AsNoTracking()
                                            .Include(x => x.Administrator)
-                                           .FirstOrDefaultAsync(x => x.DepartmentID == id.GetValueOrDefault());
+                                           .Where(x => x.DepartmentID == id.GetValueOrDefault())
+                                           .FirstOrDefaultAsync();
 
             if (department == null)
             {
@@ -155,7 +156,8 @@ namespace ContosoUniversity.Controllers
             var department = await _context.Departments
                                            .AsNoTracking()
                                            .Include(x => x.Administrator)
-                                           .FirstOrDefaultAsync(x => x.DepartmentID == id.GetValueOrDefault());
+                                           .Where(x => x.DepartmentID == id.GetValueOrDefault())
+                                           .FirstOrDefaultAsync();
 
             if (department == null)
             {

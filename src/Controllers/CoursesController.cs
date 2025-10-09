@@ -33,7 +33,8 @@ namespace ContosoUniversity.Controllers
             var course = await _context.Courses
                                        .AsNoTracking()
                                        .Include(x => x.Department)
-                                       .FirstOrDefaultAsync(x => x.CourseID == id.GetValueOrDefault());
+                                       .Where(x => x.CourseID == id.GetValueOrDefault())
+                                       .FirstOrDefaultAsync();
 
             if (course == null)
             {
@@ -163,12 +164,13 @@ namespace ContosoUniversity.Controllers
             var course = await _context.Courses
                                         .Include(c => c.Department)
                                         .AsNoTracking()
-                                        .FirstOrDefaultAsync(m => m.CourseID == id.GetValueOrDefault());
+                                        .Where(m => m.CourseID == id.GetValueOrDefault())
+                                        .FirstOrDefaultAsync();
 
 
             if (course == null)
             {
-                this.HttpContext.Response.Headers.Append("HX-Location", "/Students?pageNumber=1");
+                this.HttpContext.Response.Headers.Append("HX-Location", "/Courses?loadDetails=true");
                 this.HttpContext.Response.Headers.Append("HX-Retarget", "#detailList");
                 this.HttpContext.Response.Headers.Append("HX-Reswap", "innerHTML");
                 return NotFound();
