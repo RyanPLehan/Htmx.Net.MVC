@@ -4,7 +4,11 @@
 {
     <div class="row border-1">
         <div class="col-sm">
-            <details hx-trigger="toggle"
+            <details data-toggle-state-values="collapse|expand"
+                     data-toggle-state="collapse"
+                     hx-on:toggle='HtmxUtils.handleToggle(event, this);'
+                     hx-on:toggle-collapse='document.getElementById("instructor-courses-@item.ID").innerHTML="";'
+                     hx-trigger="toggle-expand"
                      hx-get="?id=@item.ID"
                      hx-target="#instructor-courses-@item.ID"
                      hx-swap="innerHTML">
