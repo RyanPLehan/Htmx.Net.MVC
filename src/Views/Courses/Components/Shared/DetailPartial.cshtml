@@ -1,0 +1,53 @@
+﻿@model ContosoUniversity.Models.Course
+
+@{
+    if (!ViewData.ContainsKey("IsReadonly"))
+    { ViewData["IsReadonly"] = true; }
+
+    bool isReadonly = true;
+    Boolean.TryParse(ViewData["IsReadonly"].ToString(), out isReadonly);
+
+    string readOnly = isReadonly ? "readonly" : String.Empty;
+
+
+    IEnumerable<SelectListItem> listItems = Enumerable.Empty<SelectListItem>();
+    if (ViewData.ContainsKey("Departments"))
+    {
+        listItems = (IEnumerable<SelectListItem>)ViewData["Departments"];
+    }
+}
+
+
+<dl class="row">
+    <dt class="col-sm-2">Course ID</dt>
+    <dd class="col-sm-10">
+        <input type="text" class="form-control" @readOnly 
+               name="CourseID" value="@Html.DisplayFor(model => model.CourseID)" />
+    </dd>
+    <dt class="col-sm-2">Title</dt>
+    <dd class="col-sm-10">
+        <input type="text" class="form-control" @readOnly 
+               name="Title" value="@Html.DisplayFor(model => model.Title)" />
+    </dd>
+    <dt class="col-sm-2">Credits</dt>
+    <dd class="col-sm-10">
+        <input type="text" class="form-control" @readOnly 
+               name="Credits" value="@Html.DisplayFor(model => model.Credits)" />
+    </dd>
+    <dt class="col-sm-2">Department</dt>
+    <dd class="col-sm-10">
+        @if (!isReadonly && listItems.Any())
+        {
+            <select asp-for="DepartmentID" class="form-control" asp-items=@listItems>
+                <option value="">-- Select Department --</option>
+            </select>
+        }
+        else
+        {
+            <input type="text" class="form-control" @readOnly
+                   name="DepartmentID" value="@Html.DisplayFor(model => model.Department.Name)" />
+        }
+    </dd>
+</dl>
+
+@Html.AntiForgeryToken()

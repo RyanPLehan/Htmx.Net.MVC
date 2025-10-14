@@ -21,36 +21,38 @@ namespace ContosoUniversity.Controllers
         }
 
         // GET: Courses
-        public async Task<IActionResult> Index()
+        public async Task<IActionResult> Index(bool? loadDetails)
         {
-            return ViewComponent(typeof(IndexViewComponent));
+            var parameters = new { loadDetails = loadDetails };
+            return ViewComponent(typeof(IndexViewComponent), parameters);
         }
 
         // GET: Courses/Details/5
         public async Task<IActionResult> Details(int? id)
         {
-            if (id == null)
-            {
-                return NotFound();
-            }
-
             var course = await _context.Courses
-                .Include(c => c.Department)
-                .AsNoTracking()
-                .FirstOrDefaultAsync(m => m.CourseID == id);
+                                       .AsNoTracking()
+                                       .Include(x => x.Department)
+                                       .Where(x => x.CourseID == id.GetValueOrDefault())
+                                       .FirstOrDefaultAsync();
+
             if (course == null)
             {
+                this.HttpContext.Response.Headers.Append("HX-Location", "/Courses?loadDetails=true");
+                this.HttpContext.Response.Headers.Append("HX-Retarget", "#detailList");
+                this.HttpContext.Response.Headers.Append("HX-Reswap", "innerHTML");
                 return NotFound();
             }
 
-            return View(course);
+            return ViewComponent(typeof(DetailViewComponent), course);
         }
 
         // GET: Courses/Create
-        public IActionResult Create()
+        public async Task<IActionResult> Create()
         {
-            PopulateDepartmentsDropDownList();
-            return View();
+            var deparments = await _context.Departments.ToArrayAsync();
+            ViewData["Departments"] = new SelectList(deparments, "DepartmentID", "Name");
+            return ViewComponent(typeof(CreateViewComponent), new Course());
         }
 
         // POST: Courses/Create
@@ -58,35 +60,43 @@ namespace ContosoUniversity.Controllers
         // more details see http://go.microsoft.com/fwlink/?LinkId=317598.
         [HttpPost]
         [ValidateAntiForgeryToken]
-        public async Task<IActionResult> Create([Bind("CourseID,Credits,DepartmentID,Title")] Course course)
+        public async Task<IActionResult> Create(Course course)
         {
             if (ModelState.IsValid)
             {
                 _context.Add(course);
                 await _context.SaveChangesAsync();
-                return RedirectToAction(nameof(Index));
+
+                this.HttpContext.Response.Headers.Append("HX-Trigger", "listChanged");
+                return Ok();
             }
-            PopulateDepartmentsDropDownList(course.DepartmentID);
-            return View(course);
+            else
+            {
+                string errorMsg = "The course you attempted to create is invalid.  Please make the appropriate corrections.";
+
+                this.HttpContext.Response.Headers.Append("HX-Retarget", "#error-message");
+                this.HttpContext.Response.Headers.Append("HX-Reswap", "innerHTML");
+                return Ok(errorMsg);
+            }
         }
 
         // GET: Courses/Edit/5
         public async Task<IActionResult> Edit(int? id)
         {
-            if (id == null)
-            {
-                return NotFound();
-            }
-
             var course = await _context.Courses
-                .AsNoTracking()
-                .FirstOrDefaultAsync(m => m.CourseID == id);
+                                       .AsNoTracking()
+                                       .Include(i => i.Department)
+                                       .Where(x => x.CourseID == id.GetValueOrDefault())
+                                       .FirstOrDefaultAsync();
+
             if (course == null)
             {
                 return NotFound();
             }
-            PopulateDepartmentsDropDownList(course.DepartmentID);
-            return View(course);
+
+            var deparments = await _context.Departments.ToArrayAsync();
+            ViewData["Departments"] = new SelectList(deparments, "DepartmentID", "Name", course.DepartmentID);
+            return ViewComponent(typeof(EditViewComponent), course);
         }
 
         // POST: Courses/Edit/5
@@ -97,35 +107,47 @@ namespace ContosoUniversity.Controllers
         // https://andrewlock.net/preventing-mass-assignment-or-over-posting-in-asp-net-core/
         [HttpPost, ActionName("Edit")]
         [ValidateAntiForgeryToken]
-        public async Task<IActionResult> EditPost(int? id)
+        public async Task<IActionResult> EditPost(Course course)
         {
-            if (id == null)
-            {
-                return NotFound();
-            }
+            if (course == null)
+                return Ok();
 
             var courseToUpdate = await _context.Courses
-                .FirstOrDefaultAsync(c => c.CourseID == id);
+                                               .Where(x => x.CourseID == course.CourseID)
+                                               .FirstOrDefaultAsync();
 
-            if (await TryUpdateModelAsync<Course>(courseToUpdate,
+            if (courseToUpdate == null)
+            {
+                string errorMsg = "Unable to save changes. The course was deleted by another user.";
+
+                this.HttpContext.Response.Headers.Append("HX-Retarget", "#error-message");
+                this.HttpContext.Response.Headers.Append("HX-Reswap", "innerHTML");
+                return Ok(errorMsg);
+            }
+
+            if (await TryUpdateModelAsync<Course>(
+                courseToUpdate,
                 "",
-                c => c.Credits, c => c.DepartmentID, c => c.Title))
+                s => s.Title, s => s.Credits, s => s.DepartmentID))
             {
                 try
                 {
                     await _context.SaveChangesAsync();
-                    return RedirectToAction(nameof(Index));
+                    this.HttpContext.Response.Headers.Append("HX-Trigger", "listChanged");
+                    return Ok();
                 }
-                catch (DbUpdateException /* ex */)
+                catch (DbUpdateException ex)
                 {
-                    //Log the error (uncomment ex variable name and write a log.)
-                    ModelState.AddModelError("", "Unable to save changes. " +
+                    string errorMsg = "Unable to save changes. " +
                         "Try again, and if the problem persists, " +
-                        "see your system administrator.");
+                        "see your system administrator.";
+
+                    this.HttpContext.Response.Headers.Append("HX-Retarget", "#error-message");
+                    this.HttpContext.Response.Headers.Append("HX-Reswap", "innerHTML");
+                    return Ok(errorMsg);
                 }
             }
-            PopulateDepartmentsDropDownList(courseToUpdate.DepartmentID);
-            return View(courseToUpdate);
+            return Ok();
         }
 
         private void PopulateDepartmentsDropDownList(object selectedDepartment = null)
@@ -139,32 +161,54 @@ namespace ContosoUniversity.Controllers
         // GET: Courses/Delete/5
         public async Task<IActionResult> Delete(int? id)
         {
-            if (id == null)
-            {
-                return NotFound();
-            }
-
             var course = await _context.Courses
-                .Include(c => c.Department)
-                .AsNoTracking()
-                .FirstOrDefaultAsync(m => m.CourseID == id);
+                                        .Include(c => c.Department)
+                                        .AsNoTracking()
+                                        .Where(m => m.CourseID == id.GetValueOrDefault())
+                                        .FirstOrDefaultAsync();
+
+
             if (course == null)
             {
+                this.HttpContext.Response.Headers.Append("HX-Location", "/Courses?loadDetails=true");
+                this.HttpContext.Response.Headers.Append("HX-Retarget", "#detailList");
+                this.HttpContext.Response.Headers.Append("HX-Reswap", "innerHTML");
                 return NotFound();
             }
 
-            return View(course);
+            return ViewComponent(typeof(DeleteViewComponent), course);
         }
 
         // POST: Courses/Delete/5
         [HttpPost, ActionName("Delete")]
         [ValidateAntiForgeryToken]
-        public async Task<IActionResult> DeleteConfirmed(int id)
+        public async Task<IActionResult> DeleteConfirmed(Course course)
         {
-            var course = await _context.Courses.FindAsync(id);
-            _context.Courses.Remove(course);
-            await _context.SaveChangesAsync();
-            return RedirectToAction(nameof(Index));
+            try
+            {
+                var courseToDelete = await _context.Courses
+                                                   .Where(x => x.CourseID == course.CourseID)
+                                                   .FirstOrDefaultAsync();
+
+                if (courseToDelete != null)
+                {
+                    _context.Courses.Remove(courseToDelete);
+                    await _context.SaveChangesAsync();
+                }
+
+                this.HttpContext.Response.Headers.Append("HX-Trigger", "listChanged");
+                return Ok();
+            }
+
+            catch (DbUpdateException /* ex */)
+            {
+                string errorMsg = "Delete failed. Try again, and if the problem persists " +
+                    "see your system administrator.";
+
+                this.HttpContext.Response.Headers.Append("HX-Retarget", "#error-message");
+                this.HttpContext.Response.Headers.Append("HX-Reswap", "innerHTML");
+                return Ok(errorMsg);
+            }
         }
 
         public IActionResult UpdateCourseCredits()

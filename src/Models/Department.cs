@@ -1,8 +1,11 @@
-﻿using System;
-using System.Collections.Generic;
-using System.ComponentModel.DataAnnotations;
+﻿using ContosoUniversity.Models.Binders;
+using Microsoft.AspNetCore.Mvc;
 using Microsoft.AspNetCore.Mvc.ModelBinding;
 using Microsoft.AspNetCore.Mvc.ModelBinding.Validation;
+using System;
+using System.Collections.Generic;
+using System.ComponentModel.DataAnnotations;
+using System.Text;
 
 
 namespace ContosoUniversity.Models
@@ -15,6 +18,7 @@ namespace ContosoUniversity.Models
         public string Name { get; set; }
 
         [DataType(DataType.Currency)]
+        [ModelBinder(typeof(CurrencyModelBinder))]
         public decimal Budget { get; set; }
 
         [DataType(DataType.Date)]
@@ -24,10 +28,16 @@ namespace ContosoUniversity.Models
 
         public int? InstructorID { get; set; }
 
+        public string Version
+        {
+            get { return Convert.ToBase64String(RowVersion ?? Array.Empty<byte>()); }
+            set { RowVersion = Convert.FromBase64String(value ?? string.Empty); }
+        }
+
         [Timestamp]
         [BindNever]
         [ValidateNever]
-        public byte[] RowVersion { get; set; }
+        internal byte[] RowVersion { get; set; }
 
         [BindNever]
         [ValidateNever]

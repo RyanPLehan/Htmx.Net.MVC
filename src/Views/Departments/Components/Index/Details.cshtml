@@ -1,0 +1,47 @@
+﻿@model IEnumerable<ContosoUniversity.Models.Department>
+
+@foreach (var item in Model) 
+{
+    <tr>
+        <td>
+            @Html.DisplayFor(modelItem => item.Name)
+        </td>
+        <td>
+            @Html.DisplayFor(modelItem => item.Budget)
+        </td>
+        <td>
+            @Html.DisplayFor(modelItem => item.StartDate)
+        </td>
+        <td>
+            @Html.DisplayFor(modelItem => item.RowVersion)
+        </td>
+        <td>
+            @Html.DisplayFor(modelItem => item.Administrator.FullName)
+        </td>
+        <td>
+            <a href="/departments/edit/@item.DepartmentID"
+               hx-trigger="click"
+               hx-get="/departments/edit/@item.DepartmentID"
+               hx-target="#dialog"
+               hx-swap="innerHTML">
+                Edit
+            </a>
+            | 
+            <a href="/departments/details/@item.DepartmentID"
+               hx-trigger="click"
+               hx-get="/departments/details/@item.DepartmentID"
+               hx-target="#dialog"
+               hx-swap="innerHTML">
+                Details
+            </a>
+            |                
+            <a href="/departments/delete/@item.DepartmentID"
+                hx-trigger="click"
+                hx-get="/departments/delete/@item.DepartmentID"
+                hx-target="#dialog"
+                hx-swap="innerHTML">
+                 Delete
+            </a>
+        </td>
+    </tr>
+}

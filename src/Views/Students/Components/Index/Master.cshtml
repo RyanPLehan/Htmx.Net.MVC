@@ -1,0 +1,100 @@
+﻿@{
+    ViewData["Title"] = "Students";
+}
+
+<h1>Students</h1>
+
+<p>
+    <a href="/students/create"
+       hx-trigger="click"
+       hx-get="/students/create"
+       hx-target="#dialog"
+       hx-swap="innerHTML">
+        Create New
+    </a>
+</p>
+
+<form hx-trigger="submit"
+      hx-get=""
+      hx-target="#detailList"
+      hx-swap="innerHTML"
+      hx-vals='js:{pageNumber: HtmxTable.checkFilterCriteria(document.getElementById("search-criteria"), "1")}'
+      hx-on::after-request='HtmxTable.setFilter(document.getElementById("search-criteria"));'>
+    <div class="form-actions no-color">
+        <p>
+            <label>Find by name: <input type="text" id="search-criteria" name="SearchString" /></label>
+            <input type="submit" value="Search" class="btn btn-primary" />
+            |
+            <a href="/students?pageNumber=1"
+               hx-trigger="click"
+               hx-get="/students?pageNumber=1"
+               hx-target="#detailList"
+               hx-swap="innerHTML"
+               hx-push-url="/students"
+               hx-on::after-request='HtmxTable.clearFilter(document.getElementById("search-criteria"));'>
+                Back to Full List
+            </a>
+        </p>
+    </div>
+</form>
+
+<table class="table"
+       id="StudentTable"
+       hx-on::load='if (!this.htmxDialogInitialized) { this.htmxDialogInitialized = HtmxDialog.initialize("modal", "dialog"); }'>
+    <thead>
+        <tr>
+            <th>
+                <a name="sortColumn"
+                   data-columnName="LastName"
+                   data-sortOrder="desc"
+                   href="?columnName=LastName&sortOrder=desc&filter="
+                   hx-trigger="click"
+                   hx-get="?columnName=LastName&sortOrder=desc&filter="
+                   hx-target="#detailList"
+                   hx-swap="innerHTML"
+                   hx-on::after-request='HtmxTable.flipColumnSortOrder(this, document.getElementById("search-criteria"));'>
+                    Last Name
+                </a>
+            </th>
+            <th>
+                First Name
+            </th>
+            <th>
+                <a name="sortColumn"
+                   data-columnName="EnrollmentDate"
+                   data-sortOrder="asc"
+                   href="?columnName=EnrollmentDate&sortOrder=asc&filter="
+                   hx-trigger="click"
+                   hx-get="?columnName=EnrollmentDate&sortOrder=asc&filter="
+                   hx-target="#detailList"
+                   hx-swap="innerHTML"
+                   hx-on::after-request='HtmxTable.flipColumnSortOrder(this, document.getElementById("search-criteria"));'>
+                    Enrollment Date
+                </a>
+            </th>
+            <th></th>
+        </tr>
+    </thead>
+    <tbody id="detailList"
+           hx-trigger="load, listChanged from:body"
+           hx-get="?pageNumber=1"
+           hx-target="this"
+           hx-swap="innerHTML">
+        <tr>
+            <td class="spinner-border" role="status">
+                <span class="visually-hidden">Loading...</span>
+            </td>
+        </tr>
+    </tbody>
+</table>
+
+<div id="modal" class="modal fade">
+    <div id="dialog" 
+         class="modal-dialog modal-lg modal-dialog-centered"
+         hx-target="this"
+         hx-on::after-swap="HtmxDialog.showModal(event);"
+         hx-on::before-swap="HtmxDialog.hideModal(event);">
+    </div>
+</div>
+
+

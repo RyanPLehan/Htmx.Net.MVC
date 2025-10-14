@@ -10,6 +10,7 @@ internal sealed class DepartmentConfig : IEntityTypeConfiguration<Department>
     {
         builder.ToTable("Department");
         builder.HasKey(x => x.DepartmentID);
+        builder.Ignore(x => x.Version);
 
         builder.Property<int>(x => x.DepartmentID)
             .HasColumnName("DepartmentID")

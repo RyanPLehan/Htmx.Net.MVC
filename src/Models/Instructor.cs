@@ -1,8 +1,10 @@
-﻿using System;
-using System.Collections.Generic;
-using System.ComponentModel.DataAnnotations;
+﻿using ContosoUniversity.Models.Binders;
+using Microsoft.AspNetCore.Mvc;
 using Microsoft.AspNetCore.Mvc.ModelBinding;
 using Microsoft.AspNetCore.Mvc.ModelBinding.Validation;
+using System;
+using System.Collections.Generic;
+using System.ComponentModel.DataAnnotations;
 
 
 namespace ContosoUniversity.Models
@@ -16,9 +18,8 @@ namespace ContosoUniversity.Models
 
         [BindNever]
         [ValidateNever]
-        public ICollection<CourseAssignment> CourseAssignments { get; set; }
+        public ICollection<CourseAssignment> CourseAssignments { get; set; } = new List<CourseAssignment>();
 
-        [BindNever]
         [ValidateNever]
         public OfficeAssignment? OfficeAssignment { get; set; }
     }

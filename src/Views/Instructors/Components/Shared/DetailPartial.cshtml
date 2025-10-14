@@ -1,0 +1,82 @@
+﻿@using ContosoUniversity.Models.SchoolViewModels
+@model ContosoUniversity.Models.Instructor
+
+@{
+    if (!ViewData.ContainsKey("IsReadonly"))
+    { ViewData["IsReadonly"] = true; }
+
+    bool isReadonly = true;
+    Boolean.TryParse(ViewData["IsReadonly"].ToString(), out isReadonly);
+
+    string readOnly = isReadonly ? "readonly" : String.Empty;
+
+
+    IEnumerable<AssignedCourseData> assignedCourses = Enumerable.Empty<AssignedCourseData>();
+    if (ViewData.ContainsKey("Courses"))
+    {
+        assignedCourses = (IEnumerable<AssignedCourseData>)ViewData["Courses"];
+    }
+}
+
+
+<dl class="row">
+    <dt class="col-sm-2">Last Name</dt>
+    <dd class="col-sm-10">
+        <input type="text" class="form-control" @readOnly 
+               name="LastName" value="@Html.DisplayFor(model => model.LastName)" />
+    </dd>
+    <dt class="col-sm-2">First Name</dt>
+    <dd class="col-sm-10">
+        <input type="text" class="form-control" @readOnly 
+               name="FirstName" value="@Html.DisplayFor(model => model.FirstName)" />
+    </dd>
+    <dt class="col-sm-2">Hire Date</dt>
+    <dd class="col-sm-10">
+        <input type="text" class="form-control" @readOnly 
+               name="HireDate" value="@Html.DisplayFor(model => model.HireDate)" />
+    </dd>
+    <dt class="col-sm-2">Office</dt>
+    <dd class="col-sm-10">
+        <input type="text" class="form-control" @readOnly
+               name="OfficeAssignment.Location" value="@Html.DisplayFor(model => model.OfficeAssignment.Location)" />
+    </dd>
+
+    <dt class="col-sm-2">Courses</dt>
+    <dd class="col-sm-10">
+    @if (isReadonly &&
+         Model.CourseAssignments != null && 
+         Model.CourseAssignments.Any())
+    {
+        <div class="scrollable-list-container">
+            <ul>
+                @foreach(var item in Model.CourseAssignments)
+                {
+                    <li>@item.CourseID - @item.Course.Title</li>
+                }
+            </ul>
+        </div>
+    }
+
+    @if (!isReadonly && assignedCourses.Any())
+    {
+        <div class="scrollable-checkbox-list">
+            <ul class="list-group">
+                @foreach (var item in assignedCourses)
+                {               
+                    <li class="list-group-item">
+                        <input class="form-check-input me-1"
+                               type="checkbox"
+                               name="selectedCourses"
+                               value="@item.CourseID"
+                               @(Html.Raw(item.Assigned ? "checked" : "")) />
+                        <label class="form-check-label">@item.CourseID - @item.Title</label>                            
+                    </li>
+                }
+            </ul>
+        </div>
+    }
+
+    </dd>
+</dl>
+<input type="hidden" readonly name="ID" value="@Model.ID" />
+@Html.AntiForgeryToken()

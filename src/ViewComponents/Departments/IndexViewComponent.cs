@@ -14,14 +14,18 @@ namespace ContosoUniversity.ViewComponents.Departments
             _context = context;
         }
 
-        public async Task<IViewComponentResult> InvokeAsync()
+        public async Task<IViewComponentResult> InvokeAsync(bool? loadDetails)
         {
+            // Shell should be loaded only once
+            if (!loadDetails.GetValueOrDefault()) 
+                return View("Master");
+
+
             var departments = await _context.Departments
                                             .Include(d => d.Administrator)
                                             .OrderBy(x => x.Name)
                                             .ToArrayAsync();
-
-            return View(departments);
+            return View("Details", departments);
         }
     }
 }

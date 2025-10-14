@@ -1,0 +1,49 @@
+﻿@{
+    ViewData["Title"] = "Departments";
+}
+
+<h1>Departments</h1>
+
+<p>
+    <a href="/departments/create"
+       hx-trigger="click"
+       hx-get="/departments/create"
+       hx-target="#dialog"
+       hx-swap="innerHTML">
+        Create New
+    </a>
+</p>
+<table class="table"
+       hx-on::load='if (!this.htmxDialogInitialized) { this.htmxDialogInitialized = HtmxDialog.initialize("modal", "dialog"); }'>
+    <thead>
+        <tr>
+            <th>Name</th>
+            <th>Budget</th>
+            <th>Start Date</th>
+            <th>Row Version</th>
+            <th>Administrator</th>
+            <th></th>
+        </tr>
+    </thead>
+    <tbody id="detailList"
+           hx-trigger="load, listChanged from:body"
+           hx-get="?loadDetails=true"
+           hx-target="this"
+           hx-swap="innerHTML">
+        <tr>
+            <td class="spinner-border" role="status">
+                <span class="visually-hidden">Loading...</span>
+            </td>
+        </tr>
+    </tbody>
+</table>
+<div id="modal" class="modal fade"
+     hx-on:hidden.bs.modal="HtmxDialog.clearDialog(event);">
+    <div id="dialog" 
+         class="modal-dialog modal-lg modal-dialog-centered"
+         hx-target="this"
+         hx-on::after-swap="HtmxDialog.showModal(event);"
+         hx-on::before-swap="HtmxDialog.hideModal(event);">
+    </div>
+</div>
+

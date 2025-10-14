@@ -8,6 +8,7 @@ using Microsoft.EntityFrameworkCore;
 using ContosoUniversity.Data;
 using ContosoUniversity.Models;
 using ContosoUniversity.ViewComponents.Students;
+using Microsoft.EntityFrameworkCore.Metadata.Internal;
 
 namespace ContosoUniversity.Controllers
 {
@@ -22,14 +23,16 @@ namespace ContosoUniversity.Controllers
 
         // GET: Students
         public async Task<IActionResult> Index(
-            string sortOrder,
-            string currentFilter,
-            string searchString,
-            int? pageNumber)
+            [FromQuery] string columnName,
+            [FromQuery] string sortOrder,
+            [FromQuery] string filter,
+            [FromQuery] string searchString,
+            [FromQuery] int? pageNumber)
         {
             var parameters = new {
+                columnName = columnName,
                 sortOrder = sortOrder,
-                currentFilter = currentFilter,
+                filter = filter,
                 searchString = searchString,
                 pageNumber = pageNumber,
             };
@@ -40,29 +43,28 @@ namespace ContosoUniversity.Controllers
         // GET: Students/Details/5
         public async Task<IActionResult> Details(int? id)
         {
-            if (id == null)
-            {
-                return NotFound();
-            }
-
             var student = await _context.Students
-                 .Include(s => s.Enrollments)
-                     .ThenInclude(e => e.Course)
-                 .AsNoTracking()
-                 .FirstOrDefaultAsync(m => m.ID == id);
+                                        .AsNoTracking()
+                                        .Where(x => x.ID == id.GetValueOrDefault())
+                                        .Include(x => x.Enrollments)
+                                            .ThenInclude(e => e.Course)
+                                        .FirstOrDefaultAsync();
 
             if (student == null)
             {
+                this.HttpContext.Response.Headers.Append("HX-Location", "/Students?pageNumber=1");
+                this.HttpContext.Response.Headers.Append("HX-Retarget", "#detailList");
+                this.HttpContext.Response.Headers.Append("HX-Reswap", "innerHTML");
                 return NotFound();
             }
 
-            return View(student);
+            return ViewComponent(typeof(DetailViewComponent), student);
         }
 
         // GET: Students/Create
         public IActionResult Create()
         {
-            return View();
+            return ViewComponent(typeof(CreateViewComponent), new Student());
         }
 
         // POST: Students/Create
@@ -73,39 +75,40 @@ namespace ContosoUniversity.Controllers
         public async Task<IActionResult> Create(
             [Bind("EnrollmentDate,FirstName,LastName")] Student student)
         {
-            try
+            if (ModelState.IsValid)
             {
-                if (ModelState.IsValid)
-                {
-                    _context.Add(student);
-                    await _context.SaveChangesAsync();
-                    return RedirectToAction(nameof(Index));
-                }
+                _context.Add(student);
+                await _context.SaveChangesAsync();
+
+                this.HttpContext.Response.Headers.Append("HX-Trigger", "listChanged");
+                return Ok();
             }
-            catch (DbUpdateException /* ex */)
+            else
             {
-                //Log the error (uncomment ex variable name and write a log.
-                ModelState.AddModelError("", "Unable to save changes. " +
-                    "Try again, and if the problem persists " +
-                    "see your system administrator.");
+                string errorMsg = "The student you attempted to create is invalid.  Please make the appropriate corrections.";
+
+                this.HttpContext.Response.Headers.Append("HX-Retarget", "#error-message");
+                this.HttpContext.Response.Headers.Append("HX-Reswap", "innerHTML");
+                return Ok(errorMsg);
             }
-            return View(student);
         }
 
         // GET: Students/Edit/5
         public async Task<IActionResult> Edit(int? id)
         {
-            if (id == null)
-            {
-                return NotFound();
-            }
+            var student = await _context.Students
+                                        .AsNoTracking()
+                                        .Where(x => x.ID == id.GetValueOrDefault())
+                                        .Include(x => x.Enrollments)
+                                            .ThenInclude(e => e.Course)
+                                        .FirstOrDefaultAsync();
 
-            var student = await _context.Students.FindAsync(id);
             if (student == null)
             {
                 return NotFound();
             }
-            return View(student);
+
+            return ViewComponent(typeof(EditViewComponent), student);
         }
 
         // POST: Students/Edit/5
@@ -113,86 +116,101 @@ namespace ContosoUniversity.Controllers
         // more details see http://go.microsoft.com/fwlink/?LinkId=317598.
         [HttpPost, ActionName("Edit")]
         [ValidateAntiForgeryToken]
-        public async Task<IActionResult> EditPost(int? id)
+        public async Task<IActionResult> EditPost(Student student)
         {
-            if (id == null)
+            if (student == null)
+                return Ok();
+
+            var studentToUpdate = await _context.Students
+                                                .Where(x => x.ID == student.ID)
+                                                .FirstOrDefaultAsync();
+
+            if (studentToUpdate == null)
             {
-                return NotFound();
+                string errorMsg = "Unable to save changes. The student was deleted by another user.";
+
+                this.HttpContext.Response.Headers.Append("HX-Retarget", "#error-message");
+                this.HttpContext.Response.Headers.Append("HX-Reswap", "innerHTML");
+                return Ok(errorMsg);
             }
-            var studentToUpdate = await _context.Students.FirstOrDefaultAsync(s => s.ID == id);
+
             if (await TryUpdateModelAsync<Student>(
                 studentToUpdate,
                 "",
-                s => s.FirstName, s => s.LastName, s => s.EnrollmentDate))
+                s => s.LastName, s => s.FirstName, s => s.EnrollmentDate))
             {
                 try
                 {
                     await _context.SaveChangesAsync();
-                    return RedirectToAction(nameof(Index));
+                    this.HttpContext.Response.Headers.Append("HX-Trigger", "listChanged");
+                    return Ok();
                 }
-                catch (DbUpdateException /* ex */)
+                catch (DbUpdateException ex)
                 {
-                    //Log the error (uncomment ex variable name and write a log.)
-                    ModelState.AddModelError("", "Unable to save changes. " +
+                    string errorMsg = "Unable to save changes. " +
                         "Try again, and if the problem persists, " +
-                        "see your system administrator.");
+                        "see your system administrator.";
+
+                    this.HttpContext.Response.Headers.Append("HX-Retarget", "#error-message");
+                    this.HttpContext.Response.Headers.Append("HX-Reswap", "innerHTML");
+                    return Ok(errorMsg);
                 }
             }
-            return View(studentToUpdate);
+            return Ok();
         }
 
         // GET: Students/Delete/5
-        public async Task<IActionResult> Delete(int? id, bool? saveChangesError = false)
+        public async Task<IActionResult> Delete(int? id)
         {
-            if (id == null)
-            {
-                return NotFound();
-            }
-
             var student = await _context.Students
-                .AsNoTracking()
-                .FirstOrDefaultAsync(m => m.ID == id);
+                                        .AsNoTracking()
+                                        .Where(x => x.ID == id.GetValueOrDefault())
+                                        .Include(x => x.Enrollments)
+                                            .ThenInclude(e => e.Course)
+                                        .FirstOrDefaultAsync();
+
+
             if (student == null)
             {
+                this.HttpContext.Response.Headers.Append("HX-Location", "/Students?pageNumber=1");
+                this.HttpContext.Response.Headers.Append("HX-Retarget", "#detailList");
+                this.HttpContext.Response.Headers.Append("HX-Reswap", "innerHTML");
                 return NotFound();
             }
 
-            if (saveChangesError.GetValueOrDefault())
-            {
-                ViewData["ErrorMessage"] =
-                    "Delete failed. Try again, and if the problem persists " +
-                    "see your system administrator.";
-            }
-
-            return View(student);
+            return ViewComponent(typeof(DeleteViewComponent), student);
         }
+
         // POST: Students/Delete/5
         [HttpPost, ActionName("Delete")]
         [ValidateAntiForgeryToken]
-        public async Task<IActionResult> DeleteConfirmed(int id)
+        public async Task<IActionResult> DeleteConfirmed(Student student)
         {
-            var student = await _context.Students.FindAsync(id);
-            if (student == null)
-            {
-                return RedirectToAction(nameof(Index));
-            }
-
             try
             {
-                _context.Students.Remove(student);
-                await _context.SaveChangesAsync();
-                return RedirectToAction(nameof(Index));
+                var studentToDelete = await _context.Students
+                                                    .Where(x => x.ID == student.ID)
+                                                    .FirstOrDefaultAsync();
+
+                if (studentToDelete != null)
+                {
+                    _context.Students.Remove(studentToDelete);
+                    await _context.SaveChangesAsync();
+                }
+
+                this.HttpContext.Response.Headers.Append("HX-Trigger", "listChanged");
+                return Ok();
             }
+
             catch (DbUpdateException /* ex */)
             {
-                //Log the error (uncomment ex variable name and write a log.)
-                return RedirectToAction(nameof(Delete), new { id = id, saveChangesError = true });
-            }
-        }
+                string errorMsg = "Delete failed. Try again, and if the problem persists " +
+                    "see your system administrator.";
 
-        private bool StudentExists(int id)
-        {
-            return _context.Students.Any(e => e.ID == id);
+                this.HttpContext.Response.Headers.Append("HX-Retarget", "#error-message");
+                this.HttpContext.Response.Headers.Append("HX-Reswap", "innerHTML");
+                return Ok(errorMsg);
+            }
         }
     }
 }
