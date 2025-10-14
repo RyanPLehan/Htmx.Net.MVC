@@ -9,6 +9,7 @@ using ContosoUniversity.Data;
 using ContosoUniversity.Models;
 using ContosoUniversity.Models.SchoolViewModels;
 using ContosoUniversity.ViewComponents.Instructors;
+using System.Security.Cryptography.X509Certificates;
 
 namespace ContosoUniversity.Controllers
 {
@@ -40,6 +41,7 @@ namespace ContosoUniversity.Controllers
             var instructor = await _context.Instructors
                                            .AsNoTracking()
                                            .Include(x => x.OfficeAssignment)
+                                           .Include(x => x.CourseAssignments).ThenInclude(i => i.Course)
                                            .Where(x => x.ID == id.GetValueOrDefault())
                                            .FirstOrDefaultAsync();
 
@@ -55,75 +57,59 @@ namespace ContosoUniversity.Controllers
         }
 
         // GET: Instructors/Create
-        public IActionResult Create()
+        public async Task<IActionResult> Create()
         {
             var instructor = new Instructor();
-            instructor.CourseAssignments = new List<CourseAssignment>();
-            PopulateAssignedCourseData(instructor);
-            return View();
+            ViewData["Courses"] = await PopulateAssignedCourseData(instructor.ID);
+            return ViewComponent(typeof(CreateViewComponent), new Instructor());
         }
 
         // POST: Instructors/Create
         [HttpPost]
         [ValidateAntiForgeryToken]
-        public async Task<IActionResult> Create([Bind("FirstName,HireDate,LastName,OfficeAssignment")] Instructor instructor, string[] selectedCourses)
+        public async Task<IActionResult> Create(Instructor instructor, string[] selectedCourses)
         {
-            if (selectedCourses != null)
-            {
-                instructor.CourseAssignments = new List<CourseAssignment>();
-                foreach (var course in selectedCourses)
-                {
-                    var courseToAdd = new CourseAssignment { InstructorID = instructor.ID, CourseID = int.Parse(course) };
-                    instructor.CourseAssignments.Add(courseToAdd);
-                }
-            }
             if (ModelState.IsValid)
             {
+                UpdateInstructorCourses(instructor, selectedCourses);
                 _context.Add(instructor);
                 await _context.SaveChangesAsync();
-                return RedirectToAction(nameof(Index));
+
+                this.HttpContext.Response.Headers.Append("HX-Trigger", "listChanged");
+                return Ok();
             }
-            PopulateAssignedCourseData(instructor);
-            return View(instructor);
+            else
+            {
+                string errorMsg = "The instructor you attempted to create is invalid.  Please make the appropriate corrections.";
+
+                this.HttpContext.Response.Headers.Append("HX-Retarget", "#error-message");
+                this.HttpContext.Response.Headers.Append("HX-Reswap", "innerHTML");
+                return Ok(errorMsg);
+            }
         }
 
         // GET: Instructors/Edit/5
         public async Task<IActionResult> Edit(int? id)
         {
-            if (id == null)
-            {
-                return NotFound();
-            }
-
             var instructor = await _context.Instructors
-                .Include(i => i.OfficeAssignment)
-                .Include(i => i.CourseAssignments).ThenInclude(i => i.Course)
-                .AsNoTracking()
-                .FirstOrDefaultAsync(m => m.ID == id);
+                                           .AsNoTracking()
+                                           .Include(i => i.OfficeAssignment)
+                                           .Include(i => i.CourseAssignments).ThenInclude(i => i.Course)
+                                           .Where(x => x.ID == id.GetValueOrDefault())
+                                           .FirstOrDefaultAsync();
+
             if (instructor == null)
             {
+                this.HttpContext.Response.Headers.Append("HX-Location", "/Instructors?loadDetails=true");
+                this.HttpContext.Response.Headers.Append("HX-Retarget", "#detailList");
+                this.HttpContext.Response.Headers.Append("HX-Reswap", "innerHTML");
                 return NotFound();
             }
-            PopulateAssignedCourseData(instructor);
-            return View(instructor);
+
+            ViewData["Courses"] = await PopulateAssignedCourseData(id.GetValueOrDefault());
+            return ViewComponent(typeof(EditViewComponent), instructor);
         }
 
-        private void PopulateAssignedCourseData(Instructor instructor)
-        {
-            var allCourses = _context.Courses;
-            var instructorCourses = new HashSet<int>(instructor.CourseAssignments.Select(c => c.CourseID));
-            var viewModel = new List<AssignedCourseData>();
-            foreach (var course in allCourses)
-            {
-                viewModel.Add(new AssignedCourseData
-                {
-                    CourseID = course.CourseID,
-                    Title = course.Title,
-                    Assigned = instructorCourses.Contains(course.CourseID)
-                });
-            }
-            ViewData["Courses"] = viewModel;
-        }
 
         // POST: Instructors/Edit/5
         // To protect from overposting attacks, please enable the specific properties you want to bind to, for 
@@ -131,77 +117,104 @@ namespace ContosoUniversity.Controllers
 
         [HttpPost]
         [ValidateAntiForgeryToken]
-        public async Task<IActionResult> Edit(int? id, string[] selectedCourses)
+        public async Task<IActionResult> Edit(Instructor instructor, string[] selectedCourses)
         {
-            if (id == null)
-            {
-                return NotFound();
-            }
-
             var instructorToUpdate = await _context.Instructors
-                .Include(i => i.OfficeAssignment)
-                .Include(i => i.CourseAssignments)
-                    .ThenInclude(i => i.Course)
-                .FirstOrDefaultAsync(m => m.ID == id);
+                                                   .Include(i => i.OfficeAssignment)
+                                                   .Include(i => i.CourseAssignments).ThenInclude(i => i.Course)
+                                                   .Where(x => x.ID == instructor.ID)
+                                                   .FirstOrDefaultAsync();
 
             if (await TryUpdateModelAsync<Instructor>(
                 instructorToUpdate,
                 "",
                 i => i.FirstName, i => i.LastName, i => i.HireDate, i => i.OfficeAssignment))
             {
-                if (String.IsNullOrWhiteSpace(instructorToUpdate.OfficeAssignment?.Location))
-                {
-                    instructorToUpdate.OfficeAssignment = null;
-                }
-                UpdateInstructorCourses(selectedCourses, instructorToUpdate);
                 try
                 {
+                    if (String.IsNullOrWhiteSpace(instructorToUpdate.OfficeAssignment?.Location))
+                    {
+                        instructorToUpdate.OfficeAssignment = null;
+                    }
+
+                    UpdateInstructorCourses(instructorToUpdate, selectedCourses);
                     await _context.SaveChangesAsync();
+                    this.HttpContext.Response.Headers.Append("HX-Trigger", "listChanged");
+                    return Ok();
                 }
+
                 catch (DbUpdateException /* ex */)
                 {
-                    //Log the error (uncomment ex variable name and write a log.)
-                    ModelState.AddModelError("", "Unable to save changes. " +
+                    string errorMsg = "Unable to save changes. " +
                         "Try again, and if the problem persists, " +
-                        "see your system administrator.");
+                        "see your system administrator.";
+
+                    this.HttpContext.Response.Headers.Append("HX-Retarget", "#error-message");
+                    this.HttpContext.Response.Headers.Append("HX-Reswap", "innerHTML");
+                    return Ok(errorMsg);
                 }
-                return RedirectToAction(nameof(Index));
             }
-            UpdateInstructorCourses(selectedCourses, instructorToUpdate);
-            PopulateAssignedCourseData(instructorToUpdate);
-            return View(instructorToUpdate);
+
+            return Ok();
         }
-        
-        private void UpdateInstructorCourses(string[] selectedCourses, Instructor instructorToUpdate)
+
+        private async Task<IEnumerable<AssignedCourseData>> PopulateAssignedCourseData(int instructorId)
         {
+            return await
+                (
+                    from c in _context.Courses
+                    join ca in _context.CourseAssignments on
+                    new { CourseID = c.CourseID, InstructorID = instructorId }
+                    equals
+                    new { CourseID = ca.CourseID, InstructorID = ca.InstructorID }
+                    into joinResult
+                    from jr in joinResult.DefaultIfEmpty()
+                    select new AssignedCourseData
+                    {
+                        CourseID = c.CourseID,
+                        Title = c.Title,
+                        Assigned = (jr.CourseID == null ? false : true)
+                    }
+                ).ToArrayAsync();
+
+            /* Use sub-select first
+            return await (
+                             from c in _context.Courses
+                             join sub in
+                             (
+                                from ca in _context.CourseAssignments
+                                where ca.InstructorID == instructorId
+                                select new { CourseID = ca.CourseID }
+                             ) on c.CourseID equals sub.CourseID
+                             into joinResult
+                             from jr in joinResult.DefaultIfEmpty()
+                             select new AssignedCourseData
+                             {
+                                 CourseID = c.CourseID,
+                                 Title = c.Title,
+                                 Assigned = (jr.CourseID == null ? false : true)
+                             }
+                        ).ToArrayAsync();
+            */
+        }
+
+
+        private void UpdateInstructorCourses(Instructor instructor, string[] selectedCourses)
+        {
+            // Easiest way is to remove all assigned courses, then add in only the selected ones
+            if (instructor.CourseAssignments ==  null)
+                instructor.CourseAssignments = new List<CourseAssignment>();
+
+            instructor.CourseAssignments.Clear();
+
             if (selectedCourses == null)
-            {
-                instructorToUpdate.CourseAssignments = new List<CourseAssignment>();
                 return;
-            }
 
-            var selectedCoursesHS = new HashSet<string>(selectedCourses);
-            var instructorCourses = new HashSet<int>
-                (instructorToUpdate.CourseAssignments.Select(c => c.Course.CourseID));
-            foreach (var course in _context.Courses)
-            {
-                if (selectedCoursesHS.Contains(course.CourseID.ToString()))
-                {
-                    if (!instructorCourses.Contains(course.CourseID))
-                    {
-                        instructorToUpdate.CourseAssignments.Add(new CourseAssignment { InstructorID = instructorToUpdate.ID, CourseID = course.CourseID });
-                    }
-                }
-                else
-                {
-
-                    if (instructorCourses.Contains(course.CourseID))
-                    {
-                        CourseAssignment courseToRemove = instructorToUpdate.CourseAssignments.FirstOrDefault(i => i.CourseID == course.CourseID);
-                        _context.Remove(courseToRemove);
-                    }
-                }
-            }
+            instructor.CourseAssignments = selectedCourses.Select(x => new CourseAssignment()
+                                                                        {
+                                                                            InstructorID = instructor.ID,
+                                                                            CourseID = Int32.Parse(x)
+                                                                        }).ToList();
         }
 
         // GET: Instructors/Delete/5
@@ -210,6 +223,7 @@ namespace ContosoUniversity.Controllers
             var instructor = await _context.Instructors
                                            .AsNoTracking()
                                            .Include(x => x.OfficeAssignment)
+                                           .Include(x => x.CourseAssignments).ThenInclude(i => i.Course)
                                            .Where(x => x.ID == id.GetValueOrDefault())
                                            .FirstOrDefaultAsync();
 

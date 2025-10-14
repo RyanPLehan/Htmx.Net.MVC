@@ -1,11 +1,11 @@
-﻿@model ContosoUniversity.Models.Course
+﻿@model ContosoUniversity.Models.Instructor
 
 
 <form class="modal-content"
       hx-trigger="submit"
-      hx-post="/courses/create">
+      hx-post="/instructors/create">
     <div class="modal-header">
-        <h5 class="modal-title">Create Course</h5>
+        <h5 class="modal-title">Create Instructor</h5>
     </div>
     <div class="modal-body">
         @Html.Partial("../Shared/DetailPartial.cshtml", Model)
