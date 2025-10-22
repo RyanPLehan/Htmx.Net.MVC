@@ -6,11 +6,14 @@ using Microsoft.AspNetCore.Mvc;
 using Microsoft.AspNetCore.Mvc.Rendering;
 using Microsoft.EntityFrameworkCore;
 using ContosoUniversity.Data;
+using ContosoUniversity.Enums;
 using ContosoUniversity.Models;
 using ContosoUniversity.ViewComponents.Courses;
 
 namespace ContosoUniversity.Controllers
 {
+    [ApiController]
+    [Route("[controller]")]
     public class CoursesController : Controller
     {
         private readonly SchoolContext _context;
@@ -20,39 +23,70 @@ namespace ContosoUniversity.Controllers
             _context = context;
         }
 
-        // GET: Courses
-        public async Task<IActionResult> Index(bool? loadDetails)
+        [HttpGet]
+        public async Task<IActionResult> GetAll([FromQuery] bool? loadDetails)
         {
             var parameters = new { loadDetails = loadDetails };
             return ViewComponent(typeof(IndexViewComponent), parameters);
         }
 
-        // GET: Courses/Details/5
-        public async Task<IActionResult> Details(int? id)
+        [HttpGet]
+        [Route("{id:int}")]
+        public async Task<IActionResult> GetDetail([FromRoute] int id, [FromQuery] ActionType action)
         {
-            var course = await _context.Courses
-                                       .AsNoTracking()
-                                       .Include(x => x.Department)
-                                       .Where(x => x.CourseID == id.GetValueOrDefault())
-                                       .FirstOrDefaultAsync();
+            Course? course = null;
+            IEnumerable<Department> departments = Enumerable.Empty<Department>();
 
-            if (course == null)
+            if (action == ActionType.Create ||
+                action == ActionType.Edit)
             {
-                this.HttpContext.Response.Headers.Append("HX-Location", "/Courses?loadDetails=true");
-                this.HttpContext.Response.Headers.Append("HX-Retarget", "#detailList");
-                this.HttpContext.Response.Headers.Append("HX-Reswap", "innerHTML");
-                return NotFound();
+                departments = await _context.Departments.ToArrayAsync();
             }
 
-            return ViewComponent(typeof(DetailViewComponent), course);
-        }
+            if (action == ActionType.View ||
+                action == ActionType.Delete ||
+                action == ActionType.Edit)
+            {
+                course = await _context.Courses
+                                       .AsNoTracking()
+                                       .Include(x => x.Department)
+                                       .Where(x => x.CourseID == id)
+                                       .FirstOrDefaultAsync();
 
-        // GET: Courses/Create
-        public async Task<IActionResult> Create()
-        {
-            var deparments = await _context.Departments.ToArrayAsync();
-            ViewData["Departments"] = new SelectList(deparments, "DepartmentID", "Name");
-            return ViewComponent(typeof(CreateViewComponent), new Course());
+                if (action == ActionType.Unknown ||
+                    course == null)
+                {
+                    this.HttpContext.Response.Headers.Append("HX-Location", "/Courses?loadDetails=true");
+                    this.HttpContext.Response.Headers.Append("HX-Retarget", "#detailList");
+                    this.HttpContext.Response.Headers.Append("HX-Reswap", "innerHTML");
+                    return NotFound();
+                }
+            }
+
+            IActionResult actionResult = Ok();
+
+            switch (action)
+            {
+                case ActionType.Create:
+                    ViewData["Departments"] = new SelectList(departments, "DepartmentID", "Name");
+                    actionResult = ViewComponent(typeof(CreateViewComponent), new Course());
+                    break;
+
+                case ActionType.Delete:
+                    actionResult = ViewComponent(typeof(DeleteViewComponent), course);
+                    break;
+
+                case ActionType.Edit:
+                    ViewData["Departments"] = new SelectList(departments, "DepartmentID", "Name", course.DepartmentID);
+                    actionResult = ViewComponent(typeof(EditViewComponent), course);
+                    break;
+
+                case ActionType.View:
+                    actionResult = ViewComponent(typeof(DetailViewComponent), course);
+                    break;
+            }
+
+            return actionResult;
         }
 
         // POST: Courses/Create
@@ -60,7 +94,7 @@ namespace ContosoUniversity.Controllers
         // more details see http://go.microsoft.com/fwlink/?LinkId=317598.
         [HttpPost]
         [ValidateAntiForgeryToken]
-        public async Task<IActionResult> Create(Course course)
+        public async Task<IActionResult> Create([FromBody] Course course)
         {
             if (ModelState.IsValid)
             {
@@ -80,34 +114,17 @@ namespace ContosoUniversity.Controllers
             }
         }
 
-        // GET: Courses/Edit/5
-        public async Task<IActionResult> Edit(int? id)
-        {
-            var course = await _context.Courses
-                                       .AsNoTracking()
-                                       .Include(i => i.Department)
-                                       .Where(x => x.CourseID == id.GetValueOrDefault())
-                                       .FirstOrDefaultAsync();
 
-            if (course == null)
-            {
-                return NotFound();
-            }
-
-            var deparments = await _context.Departments.ToArrayAsync();
-            ViewData["Departments"] = new SelectList(deparments, "DepartmentID", "Name", course.DepartmentID);
-            return ViewComponent(typeof(EditViewComponent), course);
-        }
-
-        // POST: Courses/Edit/5
+        // PUT: Courses/5
         // To protect from overposting attacks, please enable the specific properties you want to bind to, for 
         // more details see http://go.microsoft.com/fwlink/?LinkId=317598.
         // For Validation and Binding issues see the following
         // https://github.com/dotnet/aspnetcore/issues/29877
         // https://andrewlock.net/preventing-mass-assignment-or-over-posting-in-asp-net-core/
-        [HttpPost, ActionName("Edit")]
+        [HttpPut]
+        [Route("{id:int}")]
         [ValidateAntiForgeryToken]
-        public async Task<IActionResult> EditPost(Course course)
+        public async Task<IActionResult> Update([FromRoute] int id, [FromBody] Course course)
         {
             if (course == null)
                 return Ok();
@@ -150,44 +167,17 @@ namespace ContosoUniversity.Controllers
             return Ok();
         }
 
-        private void PopulateDepartmentsDropDownList(object selectedDepartment = null)
-        {
-            var departmentsQuery = from d in _context.Departments
-                                   orderby d.Name
-                                   select d;
-            ViewBag.DepartmentID = new SelectList(departmentsQuery.AsNoTracking(), "DepartmentID", "Name", selectedDepartment);
-        }
 
-        // GET: Courses/Delete/5
-        public async Task<IActionResult> Delete(int? id)
-        {
-            var course = await _context.Courses
-                                        .Include(c => c.Department)
-                                        .AsNoTracking()
-                                        .Where(m => m.CourseID == id.GetValueOrDefault())
-                                        .FirstOrDefaultAsync();
-
-
-            if (course == null)
-            {
-                this.HttpContext.Response.Headers.Append("HX-Location", "/Courses?loadDetails=true");
-                this.HttpContext.Response.Headers.Append("HX-Retarget", "#detailList");
-                this.HttpContext.Response.Headers.Append("HX-Reswap", "innerHTML");
-                return NotFound();
-            }
-
-            return ViewComponent(typeof(DeleteViewComponent), course);
-        }
-
-        // POST: Courses/Delete/5
-        [HttpPost, ActionName("Delete")]
+        // DELETE: Courses/5
+        [HttpDelete]
+        [Route("{id:int}")]
         [ValidateAntiForgeryToken]
-        public async Task<IActionResult> DeleteConfirmed(Course course)
+        public async Task<IActionResult> Delete([FromRoute] int id)
         {
             try
             {
                 var courseToDelete = await _context.Courses
-                                                   .Where(x => x.CourseID == course.CourseID)
+                                                   .Where(x => x.CourseID == id)
                                                    .FirstOrDefaultAsync();
 
                 if (courseToDelete != null)
@@ -211,32 +201,12 @@ namespace ContosoUniversity.Controllers
             }
         }
 
-        public IActionResult UpdateCourseCredits()
+        private void PopulateDepartmentsDropDownList(object selectedDepartment = null)
         {
-            return View();
-        }
-
-        [HttpPost]
-        public async Task<IActionResult> UpdateCourseCredits(int? multiplier)
-        {
-            if (multiplier != null)
-            {
-                ViewData["RowsAffected"] =
-                    await _context.Courses
-                                  .ExecuteUpdateAsync(x => x.SetProperty(c => c.Credits, c => c.Credits * multiplier));
-
-                    /*
-                    await _context.Database.ExecuteSqlRawAsync(
-                        "UPDATE Course SET Credits = Credits * {0}",
-                        parameters: multiplier);
-                    */
-            }
-            return View();
-        }
-
-        private bool CourseExists(int id)
-        {
-            return _context.Courses.Any(e => e.CourseID == id);
+            var departmentsQuery = from d in _context.Departments
+                                   orderby d.Name
+                                   select d;
+            ViewBag.DepartmentID = new SelectList(departmentsQuery.AsNoTracking(), "DepartmentID", "Name", selectedDepartment);
         }
     }
 }
