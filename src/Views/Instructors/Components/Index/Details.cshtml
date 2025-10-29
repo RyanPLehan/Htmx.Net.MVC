@@ -1,4 +1,5 @@
-﻿@model IEnumerable<ContosoUniversity.Models.Instructor>
+﻿@using ContosoUniversity.Enums;
+@model IEnumerable<ContosoUniversity.Models.Instructor>
 
 @foreach (var item in Model) 
 {
@@ -30,25 +31,25 @@
             }
         </div>
         <div class="col-sm">
-            <a href="/instructors/edit/@item.ID"
+            <a href="/instructors/@item.ID?action=@ActionType.Edit.ToString()"
                hx-trigger="click"
-               hx-get="/instructors/edit/@item.ID"
+               hx-get="/instructors/@item.ID?action=@ActionType.Edit.ToString()"
                hx-target="#dialog"
                hx-swap="innerHTML">
                 Edit
             </a>
             |
-            <a href="/instructors/details/@item.ID"
+            <a href="/instructors/@item.ID?action=@ActionType.View.ToString()"
                hx-trigger="click"
-               hx-get="/instructors/details/@item.ID"
+               hx-get="/instructors/@item.ID?action=@ActionType.View.ToString()"
                hx-target="#dialog"
                hx-swap="innerHTML">
                 Details
             </a>
             |
-            <a href="/instructors/delete/@item.ID"
+            <a href="/instructors/@item.ID?action=@ActionType.Delete.ToString()"
                hx-trigger="click"
-               hx-get="/instructors/delete/@item.ID"
+               hx-get="/instructors/@item.ID?action=@ActionType.Delete.ToString()"
                hx-target="#dialog"
                hx-swap="innerHTML">
                 Delete

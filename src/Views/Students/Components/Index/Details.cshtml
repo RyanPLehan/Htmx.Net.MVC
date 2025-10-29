@@ -1,4 +1,5 @@
-﻿@model PaginatedList<ContosoUniversity.Models.Student>
+﻿@using ContosoUniversity.Enums;
+@model PaginatedList<ContosoUniversity.Models.Student>
 
 @foreach (var item in Model) 
 {
@@ -13,25 +14,25 @@
             @Html.DisplayFor(modelItem => item.EnrollmentDate)
         </td>
         <td>
-            <a href="/students/edit/@item.ID"
+            <a href="/students/@item.ID?action=@ActionType.Edit.ToString()"
                hx-trigger="click"
-               hx-get="/students/edit/@item.ID"
+               hx-get="/students/@item.ID?action=@ActionType.Edit.ToString()"
                hx-target="#dialog"
                hx-swap="innerHTML">
                 Edit
             </a>
             |
-            <a href="/students/details/@item.ID"
+            <a href="/students/@item.ID?action=@ActionType.View.ToString()"
                hx-trigger="click"
-               hx-get="/students/details/@item.ID"
+               hx-get="/students/@item.ID?action=@ActionType.View.ToString()"
                hx-target="#dialog"
                hx-swap="innerHTML">
                 Details
             </a>
             |
-            <a href="/students/delete/@item.ID"
+            <a href="/students/@item.ID?action=@ActionType.Delete.ToString()"
                 hx-trigger="click"
-               hx-get="/students/delete/@item.ID"
+               hx-get="/students/@item.ID?action=@ActionType.Delete.ToString()"
                 hx-target="#dialog"
                 hx-swap="innerHTML">
                  Delete

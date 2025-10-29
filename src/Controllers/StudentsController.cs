@@ -1,17 +1,19 @@
-﻿using System;
+﻿using ContosoUniversity.Data;
+using ContosoUniversity.Enums;
+using ContosoUniversity.Models;
+using ContosoUniversity.ViewComponents.Students;
+using Microsoft.AspNetCore.Mvc;
+using Microsoft.EntityFrameworkCore;
+using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Threading.Tasks;
-using Microsoft.AspNetCore.Mvc;
-using Microsoft.AspNetCore.Mvc.Rendering;
-using Microsoft.EntityFrameworkCore;
-using ContosoUniversity.Data;
-using ContosoUniversity.Models;
-using ContosoUniversity.ViewComponents.Students;
-using Microsoft.EntityFrameworkCore.Metadata.Internal;
+
 
 namespace ContosoUniversity.Controllers
 {
+    [ApiController]
+    [Route("[controller]")]
     public class StudentsController : Controller
     {
         private readonly SchoolContext _context;
@@ -22,12 +24,12 @@ namespace ContosoUniversity.Controllers
         }
 
         // GET: Students
-        public async Task<IActionResult> Index(
-            [FromQuery] string columnName,
-            [FromQuery] string sortOrder,
-            [FromQuery] string filter,
-            [FromQuery] string searchString,
-            [FromQuery] int? pageNumber)
+        [HttpGet]
+        public async Task<IActionResult> GetAll([FromQuery] string? columnName,
+                                                [FromQuery] string? sortOrder,
+                                                [FromQuery] string? filter,
+                                                [FromQuery] string? searchString,
+                                                [FromQuery] int? pageNumber)
         {
             var parameters = new {
                 columnName = columnName,
@@ -41,30 +43,57 @@ namespace ContosoUniversity.Controllers
         }
 
         // GET: Students/Details/5
-        public async Task<IActionResult> Details(int? id)
+        [HttpGet]
+        [Route("{id:int}")]
+        public async Task<IActionResult> GetDetail([FromRoute] int id, 
+                                                   [FromQuery] ActionType action)
         {
-            var student = await _context.Students
-                                        .AsNoTracking()
-                                        .Where(x => x.ID == id.GetValueOrDefault())
-                                        .Include(x => x.Enrollments)
-                                            .ThenInclude(e => e.Course)
-                                        .FirstOrDefaultAsync();
+            Student? entity = null;
 
-            if (student == null)
+            if (action == ActionType.View ||
+                action == ActionType.Delete ||
+                action == ActionType.Edit)
             {
-                this.HttpContext.Response.Headers.Append("HX-Location", "/Students?pageNumber=1");
-                this.HttpContext.Response.Headers.Append("HX-Retarget", "#detailList");
-                this.HttpContext.Response.Headers.Append("HX-Reswap", "innerHTML");
-                return NotFound();
+                entity = await _context.Students
+                                       .AsNoTracking()
+                                       .Where(x => x.ID == id)
+                                       .Include(x => x.Enrollments)
+                                           .ThenInclude(e => e.Course)
+                                       .FirstOrDefaultAsync();
+
+                if (action == ActionType.Unknown ||
+                    entity == null)
+                {
+                    this.HttpContext.Response.Headers.Append("HX-Location", "/Students?pageNumber=1");
+                    this.HttpContext.Response.Headers.Append("HX-Retarget", "#detailList");
+                    this.HttpContext.Response.Headers.Append("HX-Reswap", "innerHTML");
+                    return NotFound();
+                }
             }
 
-            return ViewComponent(typeof(DetailViewComponent), student);
-        }
+            IActionResult actionResult = Ok();
 
-        // GET: Students/Create
-        public IActionResult Create()
-        {
-            return ViewComponent(typeof(CreateViewComponent), new Student());
+            switch (action)
+            {
+                case ActionType.Create:
+                    actionResult = ViewComponent(typeof(CreateViewComponent), new Student());
+                    break;
+
+                case ActionType.Delete:
+                    actionResult = ViewComponent(typeof(DeleteViewComponent), entity);
+                    break;
+
+                case ActionType.Edit:
+                    actionResult = ViewComponent(typeof(EditViewComponent), entity);
+                    break;
+
+                case ActionType.View:
+                    actionResult = ViewComponent(typeof(DetailViewComponent), entity);
+                    break;
+            }
+
+            return actionResult;
+
         }
 
         // POST: Students/Create
@@ -73,7 +102,7 @@ namespace ContosoUniversity.Controllers
         [HttpPost]
         [ValidateAntiForgeryToken]
         public async Task<IActionResult> Create(
-            [Bind("EnrollmentDate,FirstName,LastName")] Student student)
+            [Bind("EnrollmentDate,FirstName,LastName")][FromForm] Student student)
         {
             if (ModelState.IsValid)
             {
@@ -93,36 +122,20 @@ namespace ContosoUniversity.Controllers
             }
         }
 
-        // GET: Students/Edit/5
-        public async Task<IActionResult> Edit(int? id)
-        {
-            var student = await _context.Students
-                                        .AsNoTracking()
-                                        .Where(x => x.ID == id.GetValueOrDefault())
-                                        .Include(x => x.Enrollments)
-                                            .ThenInclude(e => e.Course)
-                                        .FirstOrDefaultAsync();
-
-            if (student == null)
-            {
-                return NotFound();
-            }
-
-            return ViewComponent(typeof(EditViewComponent), student);
-        }
-
-        // POST: Students/Edit/5
+        // PUT: Students/Edit/5
         // To protect from overposting attacks, please enable the specific properties you want to bind to, for 
         // more details see http://go.microsoft.com/fwlink/?LinkId=317598.
-        [HttpPost, ActionName("Edit")]
+        [HttpPut]
+        [Route("{id:int}")]
         [ValidateAntiForgeryToken]
-        public async Task<IActionResult> EditPost(Student student)
+        public async Task<IActionResult> Update([FromRoute] int id, 
+                                                [FromForm] Student student)
         {
             if (student == null)
                 return Ok();
 
             var studentToUpdate = await _context.Students
-                                                .Where(x => x.ID == student.ID)
+                                                .Where(x => x.ID == id)
                                                 .FirstOrDefaultAsync();
 
             if (studentToUpdate == null)
@@ -159,37 +172,16 @@ namespace ContosoUniversity.Controllers
             return Ok();
         }
 
-        // GET: Students/Delete/5
-        public async Task<IActionResult> Delete(int? id)
-        {
-            var student = await _context.Students
-                                        .AsNoTracking()
-                                        .Where(x => x.ID == id.GetValueOrDefault())
-                                        .Include(x => x.Enrollments)
-                                            .ThenInclude(e => e.Course)
-                                        .FirstOrDefaultAsync();
-
-
-            if (student == null)
-            {
-                this.HttpContext.Response.Headers.Append("HX-Location", "/Students?pageNumber=1");
-                this.HttpContext.Response.Headers.Append("HX-Retarget", "#detailList");
-                this.HttpContext.Response.Headers.Append("HX-Reswap", "innerHTML");
-                return NotFound();
-            }
-
-            return ViewComponent(typeof(DeleteViewComponent), student);
-        }
-
-        // POST: Students/Delete/5
-        [HttpPost, ActionName("Delete")]
+        // DELETE: Students/Delete/5
+        [HttpDelete]
+        [Route("{id:int}")]
         [ValidateAntiForgeryToken]
-        public async Task<IActionResult> DeleteConfirmed(Student student)
+        public async Task<IActionResult> Delete([FromRoute] int id)
         {
             try
             {
                 var studentToDelete = await _context.Students
-                                                    .Where(x => x.ID == student.ID)
+                                                    .Where(x => x.ID == id)
                                                     .FirstOrDefaultAsync();
 
                 if (studentToDelete != null)

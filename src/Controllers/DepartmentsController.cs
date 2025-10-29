@@ -1,10 +1,11 @@
 ﻿using ContosoUniversity.Data;
+using ContosoUniversity.Enums;
+using ContosoUniversity.Helpers;
 using ContosoUniversity.Models;
 using ContosoUniversity.ViewComponents.Departments;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.AspNetCore.Mvc.Rendering;
 using Microsoft.EntityFrameworkCore;
-using Microsoft.VisualBasic;
 using System;
 using System.Collections.Generic;
 using System.Linq;
@@ -12,6 +13,8 @@ using System.Threading.Tasks;
 
 namespace ContosoUniversity.Controllers
 {
+    [ApiController]
+    [Route("[controller]")]
     public class DepartmentsController : Controller
     {
         private readonly SchoolContext _context;
@@ -22,46 +25,83 @@ namespace ContosoUniversity.Controllers
         }
 
         // GET: Departments
-        public async Task<IActionResult> Index(bool? loadDetails)
+        [HttpGet]
+        public async Task<IActionResult> GetAll([FromQuery] bool? loadDetails)
         {
             var parameters = new { loadDetails = loadDetails };
             return ViewComponent(typeof(IndexViewComponent), parameters);
         }
 
         // GET: Departments/Details/5
-        public async Task<IActionResult> Details(int? id)
+        [HttpGet]
+        [Route("{id:int}")]
+        public async Task<IActionResult> GetDetail([FromRoute] int id, 
+                                                   [FromQuery] ActionType action)
         {
-            var department = await _context.Departments
-                                           .AsNoTracking()
-                                           .Include(x => x.Administrator)
-                                           .Where(x => x.DepartmentID == id.GetValueOrDefault())
-                                           .FirstOrDefaultAsync();
+            Department? entity = null;
+            IEnumerable<Instructor> instructors = Enumerable.Empty<Instructor>();
 
-            if (department == null)
+            if (action == ActionType.Create ||
+                action == ActionType.Edit)
             {
-                this.HttpContext.Response.Headers.Append("HX-Location", "/Departments?loadDetails=true");
-                this.HttpContext.Response.Headers.Append("HX-Retarget", "#detailList");
-                this.HttpContext.Response.Headers.Append("HX-Reswap", "innerHTML");
-                return NotFound();
+                instructors = await _context.Instructors.ToArrayAsync();
             }
 
-            return ViewComponent(typeof(DetailViewComponent), department);
+
+            if (action == ActionType.View ||
+                action == ActionType.Delete ||
+                action == ActionType.Edit)
+            {
+                entity = await _context.Departments
+                                       .AsNoTracking()
+                                       .Include(x => x.Administrator)
+                                       .Where(x => x.DepartmentID == id)
+                                       .FirstOrDefaultAsync();
+
+                if (action == ActionType.Unknown ||
+                    entity == null)
+                {
+                    this.HttpContext.Response.Headers.Append("HX-Location", "/Departments?loadDetails=true");
+                    this.HttpContext.Response.Headers.Append("HX-Retarget", "#detailList");
+                    this.HttpContext.Response.Headers.Append("HX-Reswap", "innerHTML");
+                    return NotFound();
+                }
+            }
+
+            IActionResult actionResult = Ok();
+
+            switch (action)
+            {
+                case ActionType.Create:
+                    ViewData["Instructors"] = new SelectList(instructors, "ID", "FullName");
+                    actionResult = ViewComponent(typeof(CreateViewComponent), new Department());
+                    break;
+
+                case ActionType.Delete:
+                    actionResult = ViewComponent(typeof(DeleteViewComponent), entity);
+                    break;
+
+                case ActionType.Edit:
+                    ViewData["Instructors"] = new SelectList(instructors, "ID", "FullName", entity.InstructorID);
+                    actionResult = ViewComponent(typeof(EditViewComponent), entity);
+                    break;
+
+                case ActionType.View:
+                    actionResult = ViewComponent(typeof(DetailViewComponent), entity);
+                    break;
+            }
+
+            return actionResult;
+
         }
 
-        // GET: Departments/Create
-        public async Task<IActionResult> Create()
-        {
-            var instructors = await _context.Instructors.ToArrayAsync();
-            ViewData["Instructors"] = new SelectList(instructors, "ID", "FullName");
-            return ViewComponent(typeof(CreateViewComponent), new Department());
-        }
 
         // POST: Departments/Create
         // To protect from overposting attacks, please enable the specific properties you want to bind to, for 
         // more details see http://go.microsoft.com/fwlink/?LinkId=317598.
         [HttpPost]
         [ValidateAntiForgeryToken]
-        public async Task<IActionResult> Create(Department department)
+        public async Task<IActionResult> Create([FromForm] Department department)
         {
             if (ModelState.IsValid)
             {
@@ -81,37 +121,24 @@ namespace ContosoUniversity.Controllers
             }
         }
 
-        // GET: Departments/Edit/5
-        public async Task<IActionResult> Edit(int? id)
-        {
-            var department = await _context.Departments
-                                           .AsNoTracking()
-                                           .Include(i => i.Administrator)
-                                           .Where(x => x.DepartmentID == id.GetValueOrDefault())
-                                           .FirstOrDefaultAsync();
 
-            if (department == null)
-            {
-                return NotFound();
-            }
-
-            var instructors = await _context.Instructors.ToArrayAsync();
-            ViewData["Instructors"] = new SelectList(instructors, "ID", "FullName", department.InstructorID);
-            return ViewComponent(typeof(EditViewComponent), department);
-        }
-
-        // POST: Departments/Edit/5
+        // PUT: Departments/Edit/5
         // To protect from overposting attacks, please enable the specific properties you want to bind to, for 
         // more details see http://go.microsoft.com/fwlink/?LinkId=317598.
-        [HttpPost]
+        // For Route Attribute see: https://learn.microsoft.com/en-us/aspnet/web-api/overview/web-api-routing-and-actions/attribute-routing-in-web-api-2
+        [HttpPut]
+        [Route("{id:int}/{version}")]
         [ValidateAntiForgeryToken]
-        public async Task<IActionResult> Edit(Department department)
+        public async Task<IActionResult> Update([FromRoute] int id, 
+                                                [FromRoute] string version, 
+                                                [FromForm] Department department)
         {
             if (department == null)
                 return Ok();
 
+            byte[] rowVersion = RowVersionHelper.FromHexString(version ?? string.Empty);
             var departmentToUpdate = await _context.Departments
-                                                   .Where(x => x.DepartmentID == department.DepartmentID)
+                                                   .Where(x => x.DepartmentID == id)
                                                    .FirstOrDefaultAsync();
 
             if (departmentToUpdate == null)
@@ -123,7 +150,8 @@ namespace ContosoUniversity.Controllers
                 return Ok(errorMsg);
             }
 
-            _context.Entry(departmentToUpdate).Property("RowVersion").OriginalValue = department.RowVersion;
+            _context.Entry(departmentToUpdate).Property("RowVersion").OriginalValue = rowVersion;
+            //_context.Entry(departmentToUpdate).Property("RowVersion").OriginalValue = department.RowVersion;
 
             if (await TryUpdateModelAsync<Department>(
                 departmentToUpdate,
@@ -150,41 +178,23 @@ namespace ContosoUniversity.Controllers
             return Ok();
         }
 
-        // GET: Departments/Delete/5
-        public async Task<IActionResult> Delete(int? id)
-        {
-            var department = await _context.Departments
-                                           .AsNoTracking()
-                                           .Include(x => x.Administrator)
-                                           .Where(x => x.DepartmentID == id.GetValueOrDefault())
-                                           .FirstOrDefaultAsync();
-
-            if (department == null)
-            {
-                this.HttpContext.Response.Headers.Append("HX-Location", "/Departments?loadDetails=true");
-                this.HttpContext.Response.Headers.Append("HX-Retarget", "#detailList");
-                this.HttpContext.Response.Headers.Append("HX-Reswap", "innerHTML");
-                return NotFound();
-            }
-
-            return ViewComponent(typeof(DeleteViewComponent), department);
-        }
-
-
-        // POST: Departments/Delete/5
-        [HttpPost]
+        // DELETE: Departments/Delete/5
+        [HttpDelete]
+        [Route("{id:int}/{version}")]
         [ValidateAntiForgeryToken]
-        public async Task<IActionResult> Delete(Department department)
+        public async Task<IActionResult> Delete([FromRoute] int id, 
+                                                [FromRoute] string version)
         {
             try
             {
+                byte[] rowVersion = RowVersionHelper.FromHexString(version ?? string.Empty);
                 var departmentToDelete = await _context.Departments
-                                                       .Where(x => x.DepartmentID == department.DepartmentID)
+                                                       .Where(x => x.DepartmentID == id)
                                                        .FirstOrDefaultAsync();             
                 
                 if (departmentToDelete != null)
                 {
-                    _context.Entry(departmentToDelete).Property("RowVersion").OriginalValue = department.RowVersion;
+                    _context.Entry(departmentToDelete).Property("RowVersion").OriginalValue = rowVersion;
                     _context.Departments.Remove(departmentToDelete);
                     await _context.SaveChangesAsync();
                 }
@@ -207,6 +217,5 @@ namespace ContosoUniversity.Controllers
                 return Ok(errorMsg);
             }
         }
-
     }
 }

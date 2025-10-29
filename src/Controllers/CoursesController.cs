@@ -32,9 +32,10 @@ namespace ContosoUniversity.Controllers
 
         [HttpGet]
         [Route("{id:int}")]
-        public async Task<IActionResult> GetDetail([FromRoute] int id, [FromQuery] ActionType action)
+        public async Task<IActionResult> GetDetail([FromRoute] int id, 
+                                                   [FromQuery] ActionType action)
         {
-            Course? course = null;
+            Course? entity = null;
             IEnumerable<Department> departments = Enumerable.Empty<Department>();
 
             if (action == ActionType.Create ||
@@ -47,14 +48,14 @@ namespace ContosoUniversity.Controllers
                 action == ActionType.Delete ||
                 action == ActionType.Edit)
             {
-                course = await _context.Courses
+                entity = await _context.Courses
                                        .AsNoTracking()
                                        .Include(x => x.Department)
                                        .Where(x => x.CourseID == id)
                                        .FirstOrDefaultAsync();
 
                 if (action == ActionType.Unknown ||
-                    course == null)
+                    entity == null)
                 {
                     this.HttpContext.Response.Headers.Append("HX-Location", "/Courses?loadDetails=true");
                     this.HttpContext.Response.Headers.Append("HX-Retarget", "#detailList");
@@ -73,16 +74,16 @@ namespace ContosoUniversity.Controllers
                     break;
 
                 case ActionType.Delete:
-                    actionResult = ViewComponent(typeof(DeleteViewComponent), course);
+                    actionResult = ViewComponent(typeof(DeleteViewComponent), entity);
                     break;
 
                 case ActionType.Edit:
-                    ViewData["Departments"] = new SelectList(departments, "DepartmentID", "Name", course.DepartmentID);
-                    actionResult = ViewComponent(typeof(EditViewComponent), course);
+                    ViewData["Departments"] = new SelectList(departments, "DepartmentID", "Name", entity.DepartmentID);
+                    actionResult = ViewComponent(typeof(EditViewComponent), entity);
                     break;
 
                 case ActionType.View:
-                    actionResult = ViewComponent(typeof(DetailViewComponent), course);
+                    actionResult = ViewComponent(typeof(DetailViewComponent), entity);
                     break;
             }
 
@@ -94,7 +95,7 @@ namespace ContosoUniversity.Controllers
         // more details see http://go.microsoft.com/fwlink/?LinkId=317598.
         [HttpPost]
         [ValidateAntiForgeryToken]
-        public async Task<IActionResult> Create([FromBody] Course course)
+        public async Task<IActionResult> Create([FromForm] Course course)
         {
             if (ModelState.IsValid)
             {
@@ -124,7 +125,8 @@ namespace ContosoUniversity.Controllers
         [HttpPut]
         [Route("{id:int}")]
         [ValidateAntiForgeryToken]
-        public async Task<IActionResult> Update([FromRoute] int id, [FromBody] Course course)
+        public async Task<IActionResult> Update([FromRoute] int id, 
+                                                [FromForm] Course course)
         {
             if (course == null)
                 return Ok();

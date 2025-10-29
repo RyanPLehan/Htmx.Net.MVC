@@ -16,6 +16,9 @@
     {
         assignedCourses = (IEnumerable<AssignedCourseData>)ViewData["Courses"];
     }
+
+    if (Model.HireDate == null || Model.HireDate == DateTime.MinValue)
+    { Model.HireDate = DateTime.Today; }
 }
 
 
