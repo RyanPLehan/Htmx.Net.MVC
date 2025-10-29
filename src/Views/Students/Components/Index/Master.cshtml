@@ -1,13 +1,14 @@
-﻿@{
+﻿@using ContosoUniversity.Enums;
+@{
     ViewData["Title"] = "Students";
 }
 
 <h1>Students</h1>
 
 <p>
-    <a href="/students/create"
+    <a href="/students/0?action=@ActionType.Create.ToString()"
        hx-trigger="click"
-       hx-get="/students/create"
+       hx-get="/students/0?action=@ActionType.Create.ToString()"
        hx-target="#dialog"
        hx-swap="innerHTML">
         Create New
@@ -18,11 +19,10 @@
       hx-get=""
       hx-target="#detailList"
       hx-swap="innerHTML"
-      hx-vals='js:{pageNumber: HtmxTable.checkFilterCriteria(document.getElementById("search-criteria"), "1")}'
       hx-on::after-request='HtmxTable.setFilter(document.getElementById("search-criteria"));'>
     <div class="form-actions no-color">
         <p>
-            <label>Find by name: <input type="text" id="search-criteria" name="SearchString" /></label>
+            <label>Find by name: <input type="text" id="search-criteria" name="searchString" /></label>
             <input type="submit" value="Search" class="btn btn-primary" />
             |
             <a href="/students?pageNumber=1"

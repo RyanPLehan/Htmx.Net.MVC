@@ -1,4 +1,5 @@
-﻿@model IEnumerable<ContosoUniversity.Models.Course>
+﻿@using ContosoUniversity.Enums;
+@model IEnumerable<ContosoUniversity.Models.Course>
 
 @foreach (var item in Model) 
 {
@@ -16,25 +17,25 @@
             @Html.DisplayFor(modelItem => item.Department.Name)
         </td>
         <td>
-            <a href="/courses/edit/@item.CourseID"
+            <a href="/courses/@item.CourseID?action=@ActionType.Edit.ToString()"
                hx-trigger="click"
-               hx-get="/courses/edit/@item.CourseID"
+               hx-get="/courses/@item.CourseID?action=@ActionType.Edit.ToString()"
                hx-target="#dialog"
                hx-swap="innerHTML">
                 Edit
             </a>
             |
-            <a href="/courses/details/@item.CourseID"
+            <a href="/courses/@item.CourseID?action=@ActionType.View.ToString()"
                hx-trigger="click"
-               hx-get="/courses/details/@item.CourseID"
+               hx-get="/courses/@item.CourseID?action=@ActionType.View.ToString()"
                hx-target="#dialog"
                hx-swap="innerHTML">
                 Details
             </a>
             |
-            <a href="/courses/delete/@item.CourseID"
+            <a href="/courses/@item.CourseID?action=@ActionType.Delete.ToString()"
                hx-trigger="click"
-               hx-get="/courses/delete/@item.CourseID"
+               hx-get="/courses/@item.CourseID?action=@ActionType.Delete.ToString()"
                hx-target="#dialog"
                hx-swap="innerHTML">
                  Delete

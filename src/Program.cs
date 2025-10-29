@@ -10,6 +10,7 @@ using Microsoft.Extensions.Hosting;
 using Microsoft.Extensions.Logging;
 using System;
 using System.Reflection;
+using System.Text.Json.Serialization;
 
 namespace ContosoUniversity
 {
@@ -45,7 +46,8 @@ namespace ContosoUniversity
 
             // See the following for differences between AddMvc, AddControllers, AddControllersWithViews, and AddRazorPages
             // https://dotnettutorials.net/lesson/difference-between-addmvc-and-addmvccore-method/
-            services.AddControllersWithViews();
+            services.AddControllersWithViews()
+                .AddJsonOptions(opt => { opt.JsonSerializerOptions.Converters.Add(new JsonStringEnumConverter()); }); ;
         }
 
         private static void ConfigureApplication(WebApplication app)
@@ -70,12 +72,20 @@ namespace ContosoUniversity
             app.UseHtmxProcessor(); // Must be added before app.UseEndpoints middleware
 
 
-            app.UseEndpoints(endpoints =>
-            {
-                endpoints.MapControllerRoute(
-                    name: "default",
-                    pattern: "{controller=Home}/{action=Index}/{id?}");
-            });
+            // See: Conventional vs Attribute Routinng (https://learn.microsoft.com/en-us/aspnet/core/mvc/controllers/routing?view=aspnetcore-9.0)
+            app.MapControllers();
+
+            //app.UseEndpoints(endpoints =>
+            //{
+            //    endpoints.MapControllers();
+            //});
+
+            //app.UseEndpoints(endpoints =>
+            //{
+            //    endpoints.MapControllerRoute(
+            //        name: "default",
+            //        pattern: "{controller=Home}/{action=Index}/{id?}");
+            //});
         }
     }
 }

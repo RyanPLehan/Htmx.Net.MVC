@@ -1,4 +1,5 @@
-﻿using ContosoUniversity.Models.Binders;
+﻿using ContosoUniversity.Helpers;
+using ContosoUniversity.Models.Binders;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.AspNetCore.Mvc.ModelBinding;
 using Microsoft.AspNetCore.Mvc.ModelBinding.Validation;
@@ -30,8 +31,10 @@ namespace ContosoUniversity.Models
 
         public string Version
         {
-            get { return Convert.ToBase64String(RowVersion ?? Array.Empty<byte>()); }
-            set { RowVersion = Convert.FromBase64String(value ?? string.Empty); }
+            // Convert 8 byte array to hexadecimal string
+            get { return RowVersionHelper.ToHexString(this.RowVersion); }
+
+            set { this.RowVersion = RowVersionHelper.FromHexString(value); }
         }
 
         [Timestamp]

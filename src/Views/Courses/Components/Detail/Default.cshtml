@@ -1,8 +1,7 @@
-﻿@model ContosoUniversity.Models.Course
+﻿@using ContosoUniversity.Enums;
+@model ContosoUniversity.Models.Course
 
-<form class="modal-content"
-      hx-trigger="submit"
-      hx-post="/courses/edit">
+<form class="modal-content">
     <div class="modal-header">
         <h5 class="modal-title">Course Details</h5>
     </div>
@@ -14,7 +13,7 @@
             <button type="button"
                     class="btn btn-primary"
                     hx-trigger="click"
-                    hx-get="/courses/edit/@Model.CourseID"
+                    hx-get="/courses/@Model.CourseID?action=@ActionType.Edit.ToString()"
                     hx-target="#dialog"
                     hx-swap="innerHTML">
                         Edit

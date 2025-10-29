@@ -1,13 +1,14 @@
-﻿@{
+﻿@using ContosoUniversity.Enums;
+@{
     ViewData["Title"] = "Instructors";
 }
 
 <h1>Instructors</h1>
 
 <p>
-    <a href="/instructors/create"
+    <a href="/instructors/0?action=@ActionType.Create.ToString()
        hx-trigger="click"
-       hx-get="/instructors/create"
+       hx-get="/instructors/0?action=@ActionType.Create.ToString()"
        hx-target="#dialog"
        hx-swap="innerHTML">
         Create New

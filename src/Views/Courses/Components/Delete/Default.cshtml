@@ -3,7 +3,8 @@
 
 <form class="modal-content"
       hx-trigger="submit"
-      hx-post="/courses/delete">
+      hx-delete="/courses/@Model.CourseID"
+      hx-params="__RequestVerificationToken">
     <div class="modal-header">
         <h5 class="modal-title">Delete Course</h5>
     </div>
